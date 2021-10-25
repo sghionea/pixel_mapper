@@ -131,3 +131,5 @@ dmypy.json
 lumos.py
 packet.py
 archive/
+/workdir/ipc1/*.png
+*.png
