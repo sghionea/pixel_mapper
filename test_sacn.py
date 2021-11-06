@@ -25,15 +25,16 @@ class Universe():
 #Configure the Universes to send to when controlling the pixels
 #format is as follows:
 #U1 = Universe(DMXSource(universe=UNIVERSE NUMBER),NUMBER OF CHANNELS IN THE UNIVERSE)  #for RGB pixels, there are three channels per pixel
-U1 = Universe(universe=4000,channelcount=300);
+U1 = Universe(universe=2000,channelcount=309);
 #universes = [U1,U2,U3,U4,U5]
 universes = [U1]
-totalpixels = 100                 #total number of pixels to map
+totalpixels = 103;                 #total number of pixels to map
 #onval = [100,100,100]             #RGB value to use when turning the pixels on for detection
 onval = [25,25,25]             #RGB value to use when turning the pixels on for detection
+#onval = [255,255,255]             #RGB value to use when turning the pixels on for detection
 
 
-sender = sacn.sACNsender(fps=40)  # provide an IP-Address to bind to if you are using Windows and want to use multicast
+sender = sacn.sACNsender()  # provide an IP-Address to bind to if you are using Windows and want to use multicast
 sender.start()  # start the sending thread
 #sender.activate_output(4000)  # start sending out data in the 1st universe
 
@@ -41,7 +42,8 @@ sender.start()  # start the sending thread
 for u in universes:
     sender.activate_output(u.universe);
     #sender[u.universe].multicast = True  # set multicast to True
-    sender[u.universe].destination = "fpp.lan"
+    #sender[u.universe].destination = "fpp.lan"
+    sender[u.universe].destination = "espixelstick02.lan"
     # Keep in mind that if multicast is on, unicast is not used
 
 # #sender[1].multicast = True  # set multicast to True
@@ -94,4 +96,4 @@ all_off();
 test_chase();
 
 #%% stop sacn
-sender.stop()  # do not forget to stop the sender
+sender.stop()  # do not forget to stop the sender.

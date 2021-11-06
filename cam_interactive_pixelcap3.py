@@ -19,18 +19,24 @@ from pypixelmapper.camera_source import startCapture
 import pypixelmapper.light_control as light_control
 
 from pypixelmapper.paths import workdir
-datadir = workdir+"ipc2/"
+datadir = workdir+"ipc3/"
 
 #%% Setup E1.31 sACN light control
 ulist = [
-    light_control.Universe(universe=2000,channelstart=9,channelcount=309),
+    light_control.Universe(universe=2000,channelstart=3,channelcount=303),
     ];
 lights = light_control.Lights(ulist,pixelcount=100);
 lights.start(fps=40);
 #onval = [20,20,20];
 #onval = [100,100,100];
+#onvalall = [50,50,50];
+#onvalall = [100,0,0];
+
+onvalall = [100,0,0];
+onval = [255,0,0];
+
 #onval = [150,150,150];
-onval = [255,255,255];
+#onval = [255,255,255];
 lights.all_on(onval);
 
 #%% Open camera for capture
@@ -123,7 +129,7 @@ vsource = startCapture();
 #%%
 #Polygon masking - turn on all pixels and allow the user to draw a polygon around them to prevent
 #detecting light sources outside the area of interest
-lights.all_on(onval);  #turn all pixels on
+lights.all_on(onvalall);  #turn all pixels on
 #lights.all_on([255,255,255]);  #turn all pixels on
 time.sleep(1)
 polyd = PolygonDrawer("Polygon1",vsource)

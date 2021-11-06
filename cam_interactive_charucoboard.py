@@ -28,7 +28,8 @@ if False:
     sys.exit(0);    
 
 
-camera_resolution = [1920,1080]   #resolution (in pixels) of the camera [Horizontal, Vertical]
+camera_resolution = [2048,1536]   #resolution (in pixels) of the camera [Horizontal, Vertical]
+#camera_resolution = [1920,1080]   #resolution (in pixels) of the camera [Horizontal, Vertical]
 #camera_resolution = [640,480]   #resolution (in pixels) of the camera [Horizontal, Vertical]
 #cap = cv2.VideoCapture('rtsp://username:password@cam.ip.add.ress:88/videoMain')  #Foscam X1 format address - others will be different
 
@@ -42,7 +43,8 @@ if False:
 #rtsp://192.168.1.204:554/onvif1
 
 if True:
-    cap = cv2.VideoCapture('rtsp://192.168.1.204:554/onvif1')
+    #cap = cv2.VideoCapture('rtsp://192.168.1.204:554/onvif1')
+    cap = cv2.VideoCapture('rtsp://admin:123456@192.168.1.104:554/cam/realmonitor?channel=1&subtype=0')
 
 cameraMatrixInit = np.array([[ 1000.,    0., camera_resolution[0]/2.],
                               [    0., 1000., camera_resolution[1]/2.],

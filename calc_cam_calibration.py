@@ -18,7 +18,7 @@ import yaml
 import pypixelmapper.camera_calibration as camera_calibration
 import pypixelmapper.arucomarkers as arucomarkers
 from pypixelmapper.paths import workdir
-datadir = workdir+"ipc2/"
+datadir = workdir+"ipc3/"
 #%% 
 # https://mecaruco2.readthedocs.io/en/latest/notebooks_rst/Aruco/sandbox/ludovic/aruco_calibration_rotation.html
 
@@ -51,7 +51,6 @@ images = images[order]
 images
 
 #%%
-
 def read_chessboards(images):
     """
     Charuco base pose estimation.
@@ -97,13 +96,14 @@ def calibrate_camera(allCorners,allIds,imsize):
     """
     print("CAMERA CALIBRATION")
 
-    cameraMatrixInit = np.array([[ 1000.,    0., imsize[0]/2.],
-                                 [    0., 1000., imsize[1]/2.],
-                                 [    0.,    0.,           1.]])
+    # cameraMatrixInit = np.array([[ 1000.,    0., imsize[0]/2.],
+    #                              [    0., 1000., imsize[1]/2.],
+    #                              [    0.,    0.,           1.]])
 
-    distCoeffsInit = np.zeros((5,1))
+    # distCoeffsInit = np.zeros((5,1))
     #flags = (cv2.CALIB_USE_INTRINSIC_GUESS + cv2.CALIB_RATIONAL_MODEL + cv2.CALIB_FIX_ASPECT_RATIO)
     flags = (cv2.CALIB_RATIONAL_MODEL)
+    #flags = (cv2.CALIB_RATIONAL_MODEL + cv2.CALIB_FIX_ASPECT_RATIO);
     (ret, camera_matrix, distortion_coefficients0,
      rotation_vectors, translation_vectors,
      stdDeviationsIntrinsics, stdDeviationsExtrinsics,
@@ -112,8 +112,10 @@ def calibrate_camera(allCorners,allIds,imsize):
                       charucoIds=allIds,
                       board=board,
                       imageSize=imsize,
-                      cameraMatrix=cameraMatrixInit,
-                      distCoeffs=distCoeffsInit,
+                      #cameraMatrix=cameraMatrixInit,
+                      cameraMatrix=None,
+                      #distCoeffs=distCoeffsInit,
+                      distCoeffs = np.zeros(5,'float32'),
                       flags=flags,
                       criteria=(cv2.TERM_CRITERIA_EPS & cv2.TERM_CRITERIA_COUNT, 10000, 1e-9))
 

@@ -1,0 +1,27 @@
+FPP DDP 192.168.1.246
+Output,Model 1,Model 2,Model 3,Model 4,Model 5,
+Pixel Port 1,
+Pixel Port 2(SC:1)(UNI:#1:1)(CHANS:903)(PIX:301),Bush L2(SC:1)(UNI:#1:1)(CHANS:450)(PIX:150),Flood rock cat(SC:451)(UNI:#1:451)(CHANS:3)(PIX:1),Bush L1(SC:454)(UNI:#1:454)(CHANS:450)(PIX:150),
+Pixel Port 3,
+Pixel Port 4(SC:904)(UNI:#1:904)(CHANS:1200)(PIX:400),Big bush(SC:904)(UNI:#1:904)(CHANS:1200)(PIX:400),
+Pixel Port 5(SC:2104)(UNI:#1:2104)(CHANS:27)(PIX:9),Flood bush top cat(SC:2104)(UNI:#1:2104)(CHANS:3)(PIX:1),Flood grass cat 1(SC:2107)(UNI:#1:2107)(CHANS:3)(PIX:1),Flood grass cat 2(SC:2110)(UNI:#1:2110)(CHANS:3)(PIX:1),Flood skull(SC:2113)(UNI:#1:2113)(CHANS:3)(PIX:1),Skull Pixels(SC:2116)(UNI:#1:2116)(CHANS:15)(PIX:5),
+Pixel Port 6,
+Pixel Port 7,
+Pixel Port 8(SC:2131)(UNI:#1:2131)(CHANS:1200)(PIX:400),Bush R1(SC:2131)(UNI:#1:2131)(CHANS:600)(PIX:200),Bush R2(SC:2731)(UNI:#1:2731)(CHANS:600)(PIX:200),
+
+
+
+
+ESPixelStick02 DDP 192.168.1.100
+Output,Model 1,Model 2,
+Pixel Port 1(SC:3331)(UNI:#1:1)(CHANS:303)(PIX:101),GarageFlood(SC:3331)(UNI:#1:1)(CHANS:3)(PIX:1),GarageSingle Line(SC:3334)(UNI:#1:4)(CHANS:300)(PIX:100),
+
+
+
+
+ESPixelStick01 DDP 192.168.1.191
+Output,
+
+
+
+
