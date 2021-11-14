@@ -445,6 +445,7 @@ for fon,foff in zip(images_on,images_off):
         return mask;
     whtmskfin = proc1(whtmsk);
     redmskfin = proc1(redmsk);
+    cv2.imshow("whtmskfin",whtmskfin);
     
     # find the contours in the mask, then sort them from left to
     # right
@@ -454,7 +455,8 @@ for fon,foff in zip(images_on,images_off):
         cv2.CHAIN_APPROX_SIMPLE)[0];
     if(len(whtcnts)>0):
         whtcnts = contours.sort_contours(whtcnts)[0];
-    redcnts = contours.sort_contours(redcnts)[0]
+    if(len(redcnts)>0):
+        redcnts = contours.sort_contours(redcnts)[0]
     
     def contourIntersect(original_image, contour1, contour2):
         # Two separate contours trying to check intersection on
@@ -507,8 +509,14 @@ for fon,foff in zip(images_on,images_off):
     #         if(intersectResult[0]):
     #             eligible_whtcnts.append(wc);
     
+    # if no white within red found, just add the largest white
+    if(len(eligible_whtcnts)==0):
+        print('adding largest white');
+        # whtcnts should be sorted
+        eligible_whtcnts.append(whtcnts[0]);
+    
     print('Found {:d} eligible white contours'.format(len(eligible_whtcnts)));
-        
+    #break;
         
         
 

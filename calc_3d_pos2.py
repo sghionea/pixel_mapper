@@ -34,7 +34,7 @@ camera_matrix, dist_coeffs = camera_calibration.load_coefficients(datadir+'calib
 elements = os.listdir(capturedir);
 print('Have these elements in {:s}'.format(capturedir));
 print(elements);
-element = elements[1];
+element = elements[5];
 elementcapdir = capturedir+element+"/"
 print('Using element',element);
 
@@ -315,14 +315,14 @@ for c in captures:
     datasets.append(obj);
     
 #%% Show poses
-fig, ax_arr = plt.subplots(int(len(datasets)/2),2, sharex=True, sharey=True);
+fig, ax_arr = plt.subplots(int(len(datasets)/2),int(len(datasets)/int(len(datasets)/2)), sharex=True, sharey=True);
 for cnt,ax in enumerate(ax_arr.flatten()):
     d = datasets[cnt];
     #ax.imshow(d.images['aruco'])
     ax.imshow(d.arucoframe)
     ax.set_title(d.name)
 fig.tight_layout();
-    
+
 #%% notesz-component of tvec is distance from camera to the aruco marker
 # https://stackoverflow.com/questions/68019526/how-can-i-get-the-distance-from-my-camera-to-an-opencv-aruco-marker
 

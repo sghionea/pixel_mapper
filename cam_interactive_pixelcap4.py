@@ -33,7 +33,8 @@ lights.start(fps=40);
 #onvalall = [100,0,0];
 
 onvalall = [100,0,0];
-onval = [255,0,0];
+#onval = [255,0,0];
+onval = [100,0,0];
 
 #onval = [150,150,150];
 #onval = [255,255,255];

@@ -1,3 +1,4 @@
+#%% imports
 import cv2
 import _thread
 import time
@@ -382,17 +383,26 @@ for fon,foff in zip(images_on,images_off):
         return output_img,masktotal;
     
     def maskWhite(img_rgb):
-        # convert to HSV
-        img_hsv=cv2.cvtColor(img_rgb.copy(), cv2.COLOR_BGR2HSV)
+        # # convert to HSV
+        # img_hsv=cv2.cvtColor(img_rgb.copy(), cv2.COLOR_BGR2HSV)
         
-        # intensity mask (white)
-        lower_white = np.array([0,0,130])
-        upper_white = np.array([255,255,255])
-        maskwhite = cv2.inRange(img_hsv, lower_white, upper_white)  
+        # # intensity mask (white)
+        # lower_white = np.array([0,0,130])
+        # upper_white = np.array([255,255,255])
+        # maskwhite = cv2.inRange(img_hsv, lower_white, upper_white)  
+        
+        # convert to Gray
+        img_gray = cv2.cvtColor(img_rgb.copy(), cv2.COLOR_BGR2GRAY);
+        #cv2.imshow('img_gray',img_gray)
+        
+        # threshold
+        #thresh = cv2.threshold(img_gray.copy(), 50, 255,cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
+        #thresh = cv2.threshold(img_gray.copy(), 50, 255, cv2.THRESH_BINARY_INV)[1]
+        thresh = cv2.threshold(img_gray.copy(), 50, 255, cv2.THRESH_BINARY)[1]
         
         # or mask
         #masktotal = cv2.bitwise_or(mask0,mask1);
-        masktotal = maskwhite;
+        masktotal = thresh;
         
         # set my output img to zero everywhere except my mask
         output_img = img_rgb.copy()
@@ -404,8 +414,9 @@ for fon,foff in zip(images_on,images_off):
     whtimg,whtmsk = maskWhite(rgbdiff);
 
     # cv2.imshow('redimg',redimg);
-    # cv2.imshow('whtimg',whtimg);
-    # break;    
+    #cv2.imshow('whtimg',whtimg);
+    #cv2.imshow('whtmsk',whtmsk);
+    #break;    
 
     #### THRESHOLD THE IMAGE DIFFERENCES (RED and WHITE)
     # cv2.imshow('whtmsk',whtmsk);
@@ -445,6 +456,8 @@ for fon,foff in zip(images_on,images_off):
         return mask;
     whtmskfin = proc1(whtmsk);
     redmskfin = proc1(redmsk);
+    #cv2.imshow("whtmskfin",whtmskfin);
+    #break;
     
     # find the contours in the mask, then sort them from left to
     # right
@@ -454,7 +467,8 @@ for fon,foff in zip(images_on,images_off):
         cv2.CHAIN_APPROX_SIMPLE)[0];
     if(len(whtcnts)>0):
         whtcnts = contours.sort_contours(whtcnts)[0];
-    redcnts = contours.sort_contours(redcnts)[0]
+    if(len(redcnts)>0):
+        redcnts = contours.sort_contours(redcnts)[0]
     
     def contourIntersect(original_image, contour1, contour2):
         # Two separate contours trying to check intersection on
@@ -484,17 +498,19 @@ for fon,foff in zip(images_on,images_off):
     # a whtcnt should be within a redcnts
     # loop over the contours
     eligible_whtcnts = [];
-    for (ri, rc) in enumerate(redcnts):
-        print('Red contour:',ri);
-        #print('')
-        for (wi, wc) in enumerate(whtcnts):
-            print('\tWhite contour:',wi);
-            intersectResult = contourIntersect(whtmskfin,rc,wc);
-            print('\t\tIntersect',intersectResult[0])
-            
-            if(intersectResult[0] and (intersectResult[1] > intersectResult[2]*(2/3))):
-                if(wc not in eligible_whtcnts):
-                    eligible_whtcnts.append(wc);
+    if False:
+        for (ri, rc) in enumerate(redcnts):
+            print('Red contour:',ri);
+            #print('')
+            for (wi, wc) in enumerate(whtcnts):
+                print('\tWhite contour:',wi);
+                intersectResult = contourIntersect(whtmskfin,rc,wc);
+                print('\t\tIntersect',intersectResult[0])
+                
+                if(intersectResult[0] and (intersectResult[1] > intersectResult[2]*(2/3))):
+                    if(wc not in eligible_whtcnts):
+                        eligible_whtcnts.append(wc);
+                    
     # largest_redcnts = 0;
     # for (wi, wc) in enumerate(whtcnts):
     #     print('White contour:',wi);
@@ -507,8 +523,15 @@ for fon,foff in zip(images_on,images_off):
     #         if(intersectResult[0]):
     #             eligible_whtcnts.append(wc);
     
-    print('Found {:d} eligible white contours'.format(len(eligible_whtcnts)));
+    # if no white within red found, just add the largest white
+    if(len(eligible_whtcnts)==0 and len(whtcnts)>0):
+        print('adding largest white');
         
+        # whtcnts should be sorted
+        eligible_whtcnts.append(whtcnts[0]);
+    
+    print('Found {:d} eligible white contours'.format(len(eligible_whtcnts)));
+    #break;
         
         
 
@@ -616,11 +639,9 @@ for fon,foff in zip(images_on,images_off):
     # #break;
     cnts = eligible_whtcnts;
     imageAnno = image.copy();
+    
+    # draw contours
     if len(cnts) > 0:
-        cnts = contours.sort_contours(cnts)[0]
-        # outer-most is always index 0, so skip this one
-        #cnts = cnts[1:];
-        
         # loop over the contours
         for (i, c) in enumerate(cnts):
             # draw the bright spot on the image
@@ -633,74 +654,77 @@ for fon,foff in zip(images_on,images_off):
             cv2.waitKey(1);
         
         #windowName = "Pixel Mapping cap {:s}".format(mycapname);
-        cv2.putText(imageAnno, 
-            text = 'U {:d} pxnum {:03d} success={:d}'.format(unum,index,success),
-            org = (100,100),
-            fontFace = cv2.FONT_HERSHEY_DUPLEX,
-            fontScale = 2,
-            color = (255,0,0),
-            thickness = 2,
-            lineType = cv2.LINE_AA
-        );
         
-        if len(cnts)== 1:
-            attempts = 0
-            print("Pixel " + str(index) + " coordinates: [" + str(x) + "," + str(y) + "]")
-            #vsource.outputpoints[unum*170+index] = [unum*170+index,cX,cY]
-            results[(unum,index)] = [unum,index,cX,cY,True];
-            success = True;
-        else:
-            #print("too many bright spots - click on pixel to locate or click outside polygon to skip")
-            print("confused - click on pixel to locate or click outside polygon to skip")
+    # exactly 1 answer, no confusion
+    if len(cnts)== 1:
+        attempts = 0
+        print("Pixel " + str(index) + " coordinates: [" + str(x) + "," + str(y) + "]")
+        #vsource.outputpoints[unum*170+index] = [unum*170+index,cX,cY]
+        results[(unum,index)] = [unum,index,cX,cY,True];
+        success = True;
+    
+    cv2.putText(imageAnno, 
+        text = 'U {:d} pxnum {:03d} success={:d}'.format(unum,index,success),
+        org = (100,100),
+        fontFace = cv2.FONT_HERSHEY_DUPLEX,
+        fontScale = 2,
+        color = (255,0,0),
+        thickness = 2,
+        lineType = cv2.LINE_AA
+    );
+    cv2.imshow(windowName,imageAnno);
+    
+    if(len(cnts) == 0 or len(cnts)>1):
+        #print("too many bright spots - click on pixel to locate or click outside polygon to skip")
+        print("confused - click on pixel to locate or click outside polygon to skip")
 
-            
-            #function to get user input during pixel mapping
-            #if the image processing can't find a pixel, the user can click on its location to specify the coordinates
-            #alternatively, the user can click outside the polygon area of interest and the coordinates will be set to 0,0 (no pixel found)
-            def on_mouse( event, x, y, buttons, mystuff):
-                unum = mystuff[0]
-                index = mystuff[1]
-                if event == cv2.EVENT_LBUTTONDOWN:
-                    # Left click means adding a point at current position to the list of points
-                    path = pltPath.Path(polyd.polygon)
-                    if path.contains_point([x,y]):
-                        #videosource.outputpoints[index] = [index,x,y]
-                        print("Adding point #%d #%d with position(%d,%d)" % (unum, index, x, y))
-                        results[(unum,index)] = [unum,index,x,y,False];
-                    else:
-                        #videosource.outputpoints[index] = [index,0,0]
-                        print("Adding point #%d #%d with position(%d,%d)" % (unum, index, 0, 0))
-                        results[(unum,index)] = [unum,index,0,0,False];
-
-            cv2.imshow(windowName,imageAnno)
-            cv2.setMouseCallback(windowName,on_mouse,[unum,index]);
-            #cv2.waitKey(5)
-            done = False;
-            while not done:
-                cv2.waitKey(50)
-                #if vsource.outputpoints[unum*170+index] != [0,0,0]:
-                if (unum,index) in results:
-                    done = True
+        
+        #function to get user input during pixel mapping
+        #if the image processing can't find a pixel, the user can click on its location to specify the coordinates
+        #alternatively, the user can click outside the polygon area of interest and the coordinates will be set to 0,0 (no pixel found)
+        def on_mouse( event, x, y, buttons, mystuff):
+            unum = mystuff[0]
+            index = mystuff[1]
+            if event == cv2.EVENT_LBUTTONDOWN:
+                # Left click means adding a point at current position to the list of points
+                path = pltPath.Path(polyd.polygon)
+                if path.contains_point([x,y]):
+                    #videosource.outputpoints[index] = [index,x,y]
+                    print("Adding point #%d #%d with position(%d,%d)" % (unum, index, x, y))
+                    results[(unum,index)] = [unum,index,x,y,False];
                 else:
-                    done = False
-            # else:
-            #     print("No bright spots found")
-            #     attempts = attempts + 1
-            # if attempts >= 2:
-            #     print('too many points attempts - click on the pixel to locate or click outside of polygon to skip') 
-            #     # #playsound('alert.wav')
-            #     # cv2.imshow("Camera1", image)
-            #     # cv2.setMouseCallback("Camera1",on_mouse,[unum*170+index,vsource])
-            #     # done = 0
-            #     # while done == 0:
-            #     #     cv2.waitKey(50)
-            #     #     #if vsource.outputpoints[unum*170+index] != [0,0,0]:
-            #     #     if (unum,index) in results:
-            #     #         done = 1
-            #     #     else:
-            #     #         done = 0
-            #done = 0;
-            #attempts = 0
+                    #videosource.outputpoints[index] = [index,0,0]
+                    print("Adding point #%d #%d with position(%d,%d)" % (unum, index, 0, 0))
+                    results[(unum,index)] = [unum,index,0,0,False];
+
+        cv2.setMouseCallback(windowName,on_mouse,[unum,index]);
+        #cv2.waitKey(5)
+        done = False;
+        while not done:
+            cv2.waitKey(50)
+            #if vsource.outputpoints[unum*170+index] != [0,0,0]:
+            if (unum,index) in results:
+                done = True
+            else:
+                done = False
+        # else:
+        #     print("No bright spots found")
+        #     attempts = attempts + 1
+        # if attempts >= 2:
+        #     print('too many points attempts - click on the pixel to locate or click outside of polygon to skip') 
+        #     # #playsound('alert.wav')
+        #     # cv2.imshow("Camera1", image)
+        #     # cv2.setMouseCallback("Camera1",on_mouse,[unum*170+index,vsource])
+        #     # done = 0
+        #     # while done == 0:
+        #     #     cv2.waitKey(50)
+        #     #     #if vsource.outputpoints[unum*170+index] != [0,0,0]:
+        #     #     if (unum,index) in results:
+        #     #         done = 1
+        #     #     else:
+        #     #         done = 0
+        #done = 0;
+        #attempts = 0
         
         #if success:
             #with open(workdir+'/data.csv', 'a') as outfile:
@@ -711,6 +735,7 @@ for fon,foff in zip(images_on,images_off):
         key = cv2.waitKey(50);
         if(key==27):    # ESC
             break;
+
 cv2.destroyWindow(windowName);
 
 #%% Save pixel results

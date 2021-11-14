@@ -1,0 +1,15 @@
+For each Capture Position/Pose for Each Element
+Step 1
+Capture poses
+python cam_interactive_aruco.py
+
+
+Step 2
+Do pixel collection
+python cam_interactive_pixelcap4.py
+
+Step 3
+Move to appropriate folder
+
+Step 4
+Run Pixel Collection
