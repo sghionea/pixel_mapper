@@ -40,8 +40,8 @@ class Lights():
         for u in self._universes:
             sender.activate_output(u.universe);
             #sender[u.universe].multicast = True  # set multicast to True
-            #sender[u.universe].destination = "fpp.lan"
-            sender[u.universe].destination = "espixelstick02.lan"
+            sender[u.universe].destination = "fpp.lan"
+            #sender[u.universe].destination = "espixelstick02.lan"
             # Keep in mind that if multicast is on, unicast is not used
         
         self._sender = sender;

@@ -23,9 +23,23 @@ datadir = workdir+"ipc3/"
 
 #%% Setup E1.31 sACN light control
 ulist = [
-    light_control.Universe(universe=2000,channelstart=3,channelcount=303),
+    #light_control.Universe(universe=2000,channelstart=3,channelcount=303),
+    
+    # FPP
+    # BUSH L2 to center
+    light_control.Universe(universe=10,channelstart=1,channelcount=450),
+    
+    # BUSH L1 leftmost
+    #light_control.Universe(universe=11,channelstart=1,channelcount=450),
+    
+    # # BUSH R1 to center
+    # light_control.Universe(universe=11,channelstart=1,channelcount=450),
+    
+    # # BUSH R2 to center
+    # light_control.Universe(universe=11,channelstart=1,channelcount=450),    
     ];
-lights = light_control.Lights(ulist,pixelcount=100);
+#lights = light_control.Lights(ulist,pixelcount=100);
+lights = light_control.Lights(ulist,pixelcount=300);
 lights.start(fps=40);
 #onval = [20,20,20];
 #onval = [100,100,100];
@@ -34,7 +48,8 @@ lights.start(fps=40);
 
 onvalall = [100,0,0];
 #onval = [255,0,0];
-onval = [100,0,0];
+onval = [100,0,0]; # garage light on, outaside dusk
+#onval = [255,0,0]; # outside 1548 45 minutes before sunset
 
 #onval = [150,150,150];
 #onval = [255,255,255];

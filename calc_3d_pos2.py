@@ -8,6 +8,9 @@ import pandas as pd
 import os
 from pathlib import Path
 
+import vedo
+import copy
+
 from imutils import contours, grab_contours
 from skimage import metrics, measure
 import imutils
@@ -34,11 +37,13 @@ camera_matrix, dist_coeffs = camera_calibration.load_coefficients(datadir+'calib
 elements = os.listdir(capturedir);
 print('Have these elements in {:s}'.format(capturedir));
 print(elements);
-element = elements[5];
+#element = elements[5];
+#element = 'bushL1c';
+element = 'bushL2L';
 elementcapdir = capturedir+element+"/"
 print('Using element',element);
 
-#%% Examine captures
+#% Examine captures
 captures = [p for p in os.listdir(elementcapdir) if os.path.isdir(os.path.join(elementcapdir,p))];
 print('Have these captures in {:s}'.format(elementcapdir));
 print(captures);
@@ -377,7 +382,7 @@ def rotationMatrixToEulerAngles(R) :
     return np.array([x, y, z])
 
 #%% vedo test
-import vedo
+
 import math
 cones = [];
 otheractors = [];
@@ -463,6 +468,8 @@ for universe,index in pixellist:
     
     else:
         print('\tNot enough captures saw this pixel');
+        #closest_point.append(np.array((0.0,0.0,0.0)))
+        #closest_point.append(np.array((np.nan,np.nan,np.nan)))
     #break;
     
 #%% vedo show rendering of points and situation
@@ -485,6 +492,72 @@ p = vedo.Plotter(bg='black',axes=1);
 actors_to_show = [title,origin_aruco]+cones+point_spheres;
 p.show(actors_to_show);
 p.close();
+
+#%% vedo show rendering of points and situation
+cones = [];
+for ds in datasets:
+    # plot camera pose representation as a cone
+    P = ds.P;
+    euler_angles_degrees = ds.euler_angles_degrees;
+    cone = vedo.shapes.Cone(P,r=100,height=165,axis=(1,0,0));
+    cone = cone.rotateX(euler_angles_degrees[0],rad=False,locally=True);
+    cone = cone.rotateY(-euler_angles_degrees[1],rad=False,locally=True);
+    cone = cone.rotateY(euler_angles_degrees[2],rad=False,locally=True);
+    cones.append(cone);
+
+origin_aruco = vedo.shapes.Rectangle(p1=(0,0),p2=(165,165),c='white'); #xy plane
+origin_aruco = origin_aruco.rotateX(0);
+
+title = vedo.shapes.Text2D('Element {:s}'.format(element), s=0.9, c='white');
+p = vedo.Plotter(bg='black',axes=1,interactive=False);
+mypoints = copy.copy(point_spheres);
+actors_to_show = [title,origin_aruco]+cones+mypoints;
+
+curr = 0;
+def myfnc(evt):
+    global curr;
+    mesh = evt.actor;
+    #print(evt.keyPressed);
+    #return;
+    if evt.keyPressed == "Right":
+        curr+=1;
+        universe,pixel = pixellist[curr]
+        point = mypoints[curr];
+        
+        print(universe,pixel);
+        
+        point.color('yellow');
+        if(curr!=1):
+            mypoints[curr-1].color('red');
+        
+        #print("click mesh and press c")
+        
+        if(curr>len(pixellist)):
+            print('Finished!')
+            curr -= 1;
+            
+        title.text('Element {:s} - Uni:{:d} Index:{:d}'.format(element,universe,pixel));
+        #return
+    # printc("mesh :", mesh.filename, c=mesh.color())
+    # printc("point:", mesh.picked3d, c="v")
+    # cpt = Point(pos=mesh.picked3d, r=20, c="v").pickable(False)
+    # plt.add(cpt)
+p.addCallback('KeyPress', myfnc)
+p.show(actors_to_show);
+
+# for (universe,pixel),point in zip(pixellist,point_spheres):
+#     print(universe,pixel);
+#     if(p.escaped):
+#         break;
+    
+vedo.interactive();
+
+p.close();
+
+#%% write as xlights model
+out = np.vstack(closest_point);
+from pypixelmapper.xlightsmodel import outputXlightsModelFile
+outputXlightsModelFile(out,pixellist);
 
 
 #%% Test Calculate Line Intersections

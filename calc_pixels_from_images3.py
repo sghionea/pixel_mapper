@@ -27,7 +27,9 @@ capturedir = workdir+"captures/"+camname+"/";
 elements = os.listdir(capturedir);
 print('Have these elements in {:s}'.format(capturedir));
 print(elements);
-element = elements[5];
+#element = elements[5];
+#element = 'bushL1c';
+element = 'bushL2l';
 elementcapdir = capturedir+element+"/"
 print('Using element',element);
 

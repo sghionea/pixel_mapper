@@ -9,8 +9,7 @@ import numpy as np
 
 xLights_output_scale_factor = 3.0  #scaling factor to reduce the size of the xLights output file to a reasonable size
 
-
-def outputXlightsModelFile(out , outfilename = 'output_xlights_model.xml'):
+def outputXlightsModelFile(out , pixellist = None, outfilename = 'testmodel.xmodel'):
     #Create output file in xlights format
     #xlights format:
     #commas separate columns (width) (X), semicolons separate rows (height) (Y), "|" separate depth (Z)
@@ -28,6 +27,7 @@ def outputXlightsModelFile(out , outfilename = 'output_xlights_model.xml'):
     zmax = np.nanmax(dataout[:,2])
     #start with a matrix filled with zeros.  
     xlout = np.zeros([xmax-xmin,zmax-zmin,ymax-ymin],'i')
+    #xlout = np.zeros([xmax-xmin,ymax-ymin,zmax-zmin],'i')
     #for each pixel, populate the location in the matrix with the index number of the pixel
     #locations in the matrix without a pixel will remain zeros
     
@@ -38,8 +38,15 @@ def outputXlightsModelFile(out , outfilename = 'output_xlights_model.xml'):
     #    X             X
     #    Y             Z
     #    Z             Y
-    for i, point in enumerate(dataout):
-    	xlout[point[0]-xmin-1,-1*(point[2]-zmin-1),point[1]-ymin-1] = i+1
+    if(pixellist is None):
+        for i, point in enumerate(dataout):
+        	xlout[point[0]-xmin-1,-1*(point[2]-zmin-1),point[1]-ymin-1] = i+1;
+    else:
+        for (universe, index), point in zip(pixellist,dataout):
+            xlout[point[0]-xmin-1,-1*(point[2]-zmin-1),point[1]-ymin-1] = index;
+            
+            #xlout[point[0]-xmin-1,point[1]-ymin-1,-1*(point[2]-zmin-1)] = index;
+            print(universe,index,point);
     
     #create an output string in xLights format
     outstring = ""
