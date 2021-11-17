@@ -85,7 +85,7 @@ class ModelUniverses():
         #break_across_first = (self.channelstart + chns) > self.universesize+1;
         universecount = int(chns/self.universesize)+1;
         universecountrem = chns%self.universesize;
-        break_across_first = ((relchannelstart + chns) > self.universesize+1) and (universecount>2)
+        break_across_first = ((relchannelstart + chns) > self.universesize+1) and (universecount<2)
         # if(universecountrem==chns):
         #     universecount-=1; # subtract 1 if perfect fit (don't create new uni)
             

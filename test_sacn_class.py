@@ -36,7 +36,7 @@ ulist = [
     
     # GARAGE TEST - order
     #light_control.ModelUniverses('garage_new_strand',universe=10000,    channelstart=3,             channelcount=100*3),
-    light_control.ModelUniverses('garage_old_strand',universe=10000,    channelstart=303+(3*50),           channelcount=100*3),
+    light_control.ModelUniverses('garage_old_strand',universe=10000,    channelstart=303,           channelcount=100*3),
     
     # # GARAGE TEST - first model occurs in other universe
     # #light_control.ModelUniverses('garage_new_strand',universe=10000,    channelstart=3,             channelcount=100*3),
@@ -87,7 +87,8 @@ r = lights.all_on([100,100,100]);
 lights.start(fps=40);
 
 #%%
-lights.all_on([25,25,25]);
+#lights.all_on([25,25,25]);
+lights.all_on([75,75,75]);
 
 #%%
 #lights.set_next()
