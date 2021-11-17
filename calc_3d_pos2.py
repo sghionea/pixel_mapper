@@ -120,6 +120,59 @@ class CaptureSet:
     capdir : str;
     images : dict;
     data : pd.DataFrame();
+
+    def findArucoPoses(self,show=False):
+        markerid_to_search = 40;
+        #markerid_to_search = 41;
+        
+        # aruco info
+        aruco_dict,size_of_marker = arucomarkers.getArucoInfo();
+        arucoParams = arucomarkers.getArucoDetector();
+        arucoParams.cornerRefinementMethod = aruco.CORNER_REFINE_SUBPIX;
+        arucoParams.adaptiveThreshConstant = 3; # default is 7.0
+        
+        # # camera calibration
+        # camera_matrix, dist_coeffs = camera_calibration.load_coefficients(datadir+'calib.yaml');
+        h,  w = self.images['aruco'].shape[:2]
+        newcameramtx, roi = cv2.getOptimalNewCameraMatrix(camera_matrix,dist_coeffs,(w,h),1,(w,h))
+        
+        # read aruco registration image and detect markers
+        #frame = cv2.imread(mycapdir + "/aruco_img.png")
+        frame = self.images['aruco'];
+        
+        gray = cv2.cvtColor(frame.copy(), cv2.COLOR_BGR2GRAY)
+        corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(gray, aruco_dict, parameters = arucoParams)
+        frame2 = aruco.drawDetectedMarkers(frame.copy(), corners, ids, (0,255,0));
+        
+        print('Finding poses for markers',ids.flatten().tolist());
+        rvecs, tvecs, _objpts = aruco.estimatePoseSingleMarkers(corners, size_of_marker , camera_matrix, dist_coeffs);
+        
+        # # select the marker we want
+        # idx = np.where(ids==markerid_to_search)[0][0]
+        # rvec = rvecs[idx];
+        # tvec = tvecs[idx];
+        
+        # #draw axis
+        # length_of_axis = size_of_marker/2;
+        # frame2 = aruco.drawAxis(frame2, camera_matrix, dist_coeffs, rvec, tvec, length_of_axis)
+
+        if(show):
+            cv2.imshow("registration",frame2);
+        
+        # remember the relevant tvec/rvec
+        self.rvecs = rvecs;
+        self.tvecs = tvecs;
+        self.ids = ids;
+        self.arucoframe = frame2;
+        self.newcameramtx = newcameramtx;
+        
+        # # a particular aruco marker
+        # self.rvec = rvec;
+        # self.tvec = tvec;
+        # print('rvec',rvec);
+        # print('tvec',tvec);
+        
+        # self.morePoseCalculations();
     
     def poseCalculate(self,show=False):
         markerid_to_search = 40;
@@ -141,6 +194,7 @@ class CaptureSet:
         gray = cv2.cvtColor(frame.copy(), cv2.COLOR_BGR2GRAY)
         corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(gray, aruco_dict, parameters = arucoParams)
         frame2 = aruco.drawDetectedMarkers(frame.copy(), corners, ids, (0,255,0));
+        
         print('Finding poses for markers',ids.flatten().tolist());
         rvecs, tvecs, _objpts = aruco.estimatePoseSingleMarkers(corners, size_of_marker , camera_matrix, dist_coeffs);
         
@@ -159,12 +213,14 @@ class CaptureSet:
         self.rvecs = rvecs;
         self.tvecs = tvecs;
         self.ids = ids;
+        self.arucoframe = frame2;
+        self.newcameramtx = newcameramtx;
+        
+        # a particular aruco marker
         self.rvec = rvec;
         self.tvec = tvec;
         print('rvec',rvec);
         print('tvec',tvec);
-        self.arucoframe = frame2;
-        self.newcameramtx = newcameramtx;
         
         self.morePoseCalculations();
         
@@ -315,7 +371,8 @@ for c in captures:
         images = {'aruco':im_aruco,'all':im_all},
         data = data
         );
-    obj.poseCalculate()
+    #obj.poseCalculate()
+    obj.findArucoPoses(show=False);
     obj.fileList();
     datasets.append(obj);
     

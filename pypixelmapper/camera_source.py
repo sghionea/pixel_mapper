@@ -18,7 +18,7 @@ def openCaptureSource():
     
     if True:
         #cap = cv2.VideoCapture('rtsp://192.168.1.204:554/onvif1');
-        cap = cv2.VideoCapture('rtsp://admin:123456@192.168.1.104:554/cam/realmonitor?channel=1&subtype=0')
+        cap = cv2.VideoCapture('rtsp://admin:123456@1G021E7PAA00187.lan:554/cam/realmonitor?channel=1&subtype=0')
         
     return cap;
 
