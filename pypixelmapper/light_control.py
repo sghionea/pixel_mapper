@@ -72,28 +72,38 @@ class ModelUniverses():
         self.eff_abs_channel_stop = self.channelstart + chns;
         print('-'*5 + self.name + '-'*5);
         print('Abs Chs {:d} to {:d}'.format(self.eff_abs_channel_start,self.eff_abs_channel_stop));
+        print('Chns',chns);
         
         # is first channel occurring outside of our base universe?
         n_universe_increment = 0;
-        # n_universe_increment = int(self.channelstart/self.universesize);
-        # print('Uni Increment',n_universe_increment)
+        n_universe_increment = int(self.channelstart/self.universesize);
+        print('Uni Increment',n_universe_increment)
+        relchannelstart = self.channelstart-(n_universe_increment*self.universesize)
+        print('relchannelstart',relchannelstart)
         
         # how does this break-down across universes?
-        break_across_first = (self.channelstart + chns) > self.universesize+1;
+        #break_across_first = (self.channelstart + chns) > self.universesize+1;
         universecount = int(chns/self.universesize)+1;
         universecountrem = chns%self.universesize;
+        break_across_first = ((relchannelstart + chns) > self.universesize+1) and (universecount>2)
         # if(universecountrem==chns):
         #     universecount-=1; # subtract 1 if perfect fit (don't create new uni)
             
         if(break_across_first):
+            print('break across first')
             universecount+=1;
         print('{:d} universes (rem: {:})'.format(universecount,universecountrem))
         
         self.eff_univ_start = self.startuniverse+n_universe_increment;
         self.eff_univ_stop = self.startuniverse+n_universe_increment+universecount-1;
-        self.eff_univ_channel_start = self.eff_abs_channel_start;
+        #self.eff_univ_channel_start = self.eff_abs_channel_start;
+        self.eff_univ_channel_start = relchannelstart;
         if(break_across_first):
-            self.eff_univ_channel_stop = universecountrem-(self.universesize - self.channelstart + 1);
+            #self.eff_univ_channel_stop = universecountrem-(self.universesize - self.channelstart + 1);
+            #self.eff_univ_channel_stop = universecountrem-(self.universesize - relchannelstart + 1);
+            self.eff_univ_channel_stop = universecountrem;
+        elif(universecount==1):
+            self.eff_univ_channel_stop = relchannelstart+universecountrem
         else:
             self.eff_univ_channel_stop = universecountrem;
             
@@ -103,16 +113,39 @@ class ModelUniverses():
             ));
         
         lastch = self.eff_abs_channel_start;
+        lastunichns = 0;
+        remaining_channels = chns;
         for i in range(universecount):
             chstart = 1;
-            if(i==0 and self.channelstart != 0):
-                chstart = self.eff_abs_channel_start;
+            if(i==0 and relchannelstart != 0):
+                #chstart = self.eff_abs_channel_start;
+                chstart = relchannelstart;
                 
             unichns = self.universesize;
-            if(i==universecount-1):
-                unichns = self.eff_univ_channel_stop;
-            if(i==0 and break_across_first):
-                unichns = self.universesize - chstart+1;
+            # if(universecount==1):
+            #     unichns = chns;
+            # elif(i==universecount-1):
+            #     unichns = self.eff_univ_channel_stop;
+            # if(i==0 and break_across_first):
+            #     unichns = self.universesize - chstart+1;
+            # elif(i==universecount-1 and universecount==2 and break_across_first):                
+            #     unichns = self.eff_univ_channel_stop-lastunichns;
+            
+            if(not break_across_first):
+                # 1 universe
+                if(universecount == 1):
+                    unichns = chns;
+                # last universe
+                elif(i==universecount-1):
+                    unichns = self.eff_univ_channel_stop;
+            else:
+                if(i==0):
+                    unichns = self.universesize - chstart+1;
+                # elif(i==universecount-1 and universecount==2):                
+                #     unichns = self.eff_univ_channel_stop-lastunichns;
+                elif(i==universecount-1):
+                    unichns = remaining_channels;
+            
             u = Universe(
                 self.eff_univ_start + i,
                 channelcount = unichns,
@@ -129,6 +162,9 @@ class ModelUniverses():
             self.universe_ranges.append(rng);
             
             lastch = unistop+1;
+            #lastunichns = unichns;
+            remaining_channels -= unichns;
+            print('remaining',remaining_channels)
         
         #print('{:d} rgb pixels'.format(self.pixelcount));
         print('{:d} rgb pixels'.format(int(chns/3)));
@@ -258,7 +294,7 @@ class ModelUniverses():
             # method 2
             u_data = [0]*self.universesize;
             rng = range(u.channelstart,u.channelstart+u.channelcount);
-            #print('Iterate',rng)
+            print('Iterate',rng)
             for i in rng:
                 #print(i)
                 u_data[i-1] = onval;

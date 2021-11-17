@@ -105,7 +105,8 @@ def convert_to_modeluniverse(allmodels,modelname='Bush R1'):
     
     #ModelUniverses('garage_old_strand',universe=10000,    channelstart=303+(3*50),           channelcount=100*3),
     m = ModelUniverses(modelname, universe=10, channelcount=chns, channelstart=startchannel)
-    pass;
+    
+    return m;
 
 #%% test code
 if __name__ == "__main__":

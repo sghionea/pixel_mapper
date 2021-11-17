@@ -34,13 +34,13 @@ ulist = [
     # light_control.ModelUniverses('garage_new_strand',universe=10000,    channelstart=3,             channelcount=100*3),
     # light_control.ModelUniverses('garage_old_strand',universe=10000,    channelstart=303+(50*3),    channelcount=20*3),
     
-    # # GARAGE TEST - order
-    # light_control.ModelUniverses('garage_new_strand',universe=10000,    channelstart=3,             channelcount=100*3),
-    # light_control.ModelUniverses('garage_old_strand',universe=10000,    channelstart=303+(3*50),           channelcount=100*3),
-    
-    # GARAGE TEST - first model occurs in other universe
+    # GARAGE TEST - order
     #light_control.ModelUniverses('garage_new_strand',universe=10000,    channelstart=3,             channelcount=100*3),
-    light_control.ModelUniverses('garage_old_strand_last',universe=10000,    channelstart=303+(3*80),           channelcount=10*3),
+    light_control.ModelUniverses('garage_old_strand',universe=10000,    channelstart=303+(3*50),           channelcount=100*3),
+    
+    # # GARAGE TEST - first model occurs in other universe
+    # #light_control.ModelUniverses('garage_new_strand',universe=10000,    channelstart=3,             channelcount=100*3),
+    # light_control.ModelUniverses('garage_old_strand_last',universe=10000,    channelstart=303+(3*80),           channelcount=10*3),
     
     #light_control.ModelUniverses('garage_test_2ndstrandB',universe=10000,channelstart=302,channelcount=100*3),
     
