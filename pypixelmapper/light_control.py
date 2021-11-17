@@ -81,73 +81,60 @@ class ModelUniverses():
         relchannelstart = self.channelstart-(n_universe_increment*self.universesize)
         print('relchannelstart',relchannelstart)
         
-        # how does this break-down across universes?
-        #break_across_first = (self.channelstart + chns) > self.universesize+1;
-        universecount = int(chns/self.universesize)+1;
-        universecountrem = chns%self.universesize;
-        break_across_first = ((relchannelstart + chns) > self.universesize+1) and (universecount<2)
-        # if(universecountrem==chns):
-        #     universecount-=1; # subtract 1 if perfect fit (don't create new uni)
+        # # how does this break-down across universes?
+        # #break_across_first = (self.channelstart + chns) > self.universesize+1;
+        # universecount = int(chns/self.universesize)+1;
+        # universecountrem = chns%self.universesize;
+        # break_across_first = ((relchannelstart + chns) > self.universesize+1) and (universecount<2)
+        # # if(universecountrem==chns):
+        # #     universecount-=1; # subtract 1 if perfect fit (don't create new uni)
             
-        if(break_across_first):
-            print('break across first')
-            universecount+=1;
-        print('{:d} universes (rem: {:})'.format(universecount,universecountrem))
+        # if(break_across_first):
+        #     print('break across first')
+        #     universecount+=1;
+        # print('{:d} universes (rem: {:})'.format(universecount,universecountrem))
         
         self.eff_univ_start = self.startuniverse+n_universe_increment;
-        self.eff_univ_stop = self.startuniverse+n_universe_increment+universecount-1;
+        #self.eff_univ_stop = self.startuniverse+n_universe_increment+universecount-1;
         #self.eff_univ_channel_start = self.eff_abs_channel_start;
         self.eff_univ_channel_start = relchannelstart;
-        if(break_across_first):
-            #self.eff_univ_channel_stop = universecountrem-(self.universesize - self.channelstart + 1);
-            #self.eff_univ_channel_stop = universecountrem-(self.universesize - relchannelstart + 1);
-            self.eff_univ_channel_stop = universecountrem;
-        elif(universecount==1):
-            self.eff_univ_channel_stop = relchannelstart+universecountrem
-        else:
-            self.eff_univ_channel_stop = universecountrem;
+        # if(break_across_first):
+        #     #self.eff_univ_channel_stop = universecountrem-(self.universesize - self.channelstart + 1);
+        #     #self.eff_univ_channel_stop = universecountrem-(self.universesize - relchannelstart + 1);
+        #     self.eff_univ_channel_stop = universecountrem;
+        # elif(universecount==1):
+        #     self.eff_univ_channel_stop = relchannelstart+universecountrem
+        # else:
+        #     self.eff_univ_channel_stop = universecountrem;
             
-        print('U{:d} Ch {:d}  --> to --> U{:d} Ch {:d}'.format(
+        # print('U{:d} Ch {:d}  --> to --> U{:d} Ch {:d}'.format(
+        #     self.eff_univ_start,self.eff_univ_channel_start,
+        #     self.eff_univ_stop,self.eff_univ_channel_stop,
+        #     ));
+        print('starting point U{:d} Ch {:d}'.format(
             self.eff_univ_start,self.eff_univ_channel_start,
-            self.eff_univ_stop,self.eff_univ_channel_stop,
             ));
         
-        lastch = self.eff_abs_channel_start;
-        lastunichns = 0;
+        # assign / fill universes
+        lastabsch = self.eff_abs_channel_start;
+        lastunich = self.eff_univ_channel_start;
+        lastuni = n_universe_increment+self.startuniverse;
         remaining_channels = chns;
-        for i in range(universecount):
-            chstart = 1;
-            if(i==0 and relchannelstart != 0):
-                #chstart = self.eff_abs_channel_start;
-                chstart = relchannelstart;
-                
-            unichns = self.universesize;
-            # if(universecount==1):
-            #     unichns = chns;
-            # elif(i==universecount-1):
-            #     unichns = self.eff_univ_channel_stop;
-            # if(i==0 and break_across_first):
-            #     unichns = self.universesize - chstart+1;
-            # elif(i==universecount-1 and universecount==2 and break_across_first):                
-            #     unichns = self.eff_univ_channel_stop-lastunichns;
+        while remaining_channels > 0:
+            print('-Loop lastuni={:d}'.format(lastuni));
+            chstart = lastunich;
             
-            if(not break_across_first):
-                # 1 universe
-                if(universecount == 1):
-                    unichns = chns;
-                # last universe
-                elif(i==universecount-1):
-                    unichns = self.eff_univ_channel_stop;
+            # will overflow this universe?
+            unichns = remaining_channels
+            if(lastunich+remaining_channels > self.universesize):
+                print('fill to end of universe')
+                unichns = self.universesize - chstart;
+                lastunich = 1;
             else:
-                if(i==0):
-                    unichns = self.universesize - chstart+1;
-                # elif(i==universecount-1 and universecount==2):                
-                #     unichns = self.eff_univ_channel_stop-lastunichns;
-                elif(i==universecount-1):
-                    unichns = remaining_channels;
-            
+                lastunich += unichns;
+                
             u = Universe(
-                self.eff_univ_start + i,
+                lastuni,
                 channelcount = unichns,
                 channelstart = chstart,
                 universesize = self.universesize,
@@ -155,16 +142,75 @@ class ModelUniverses():
             self.universes.append( u );
             
             # what is this universe's absolute range?
-            unistart = lastch;
-            unistop = lastch+unichns-1;
+            unistart = lastabsch;
+            unistop = lastabsch+unichns-1;
             rng = range(unistart,unistop,1);
             print('\t',rng);
             self.universe_ranges.append(rng);
             
-            lastch = unistop+1;
-            #lastunichns = unichns;
+            #lastch = unistop+1;
+            lastabsch = unistop+1;
+            #lastunich = chstart+unichns+1;
+            lastuni += 1;
             remaining_channels -= unichns;
+            #lastunichns = unichns;
+            #remaining_channels -= unichns;
             print('remaining',remaining_channels)
+                
+        
+        # lastch = self.eff_abs_channel_start;
+        # lastunichns = 0;
+        # remaining_channels = chns;
+        # for i in range(universecount):
+        #     chstart = 1;
+        #     if(i==0 and relchannelstart != 0):
+        #         #chstart = self.eff_abs_channel_start;
+        #         chstart = relchannelstart;
+                
+        #     unichns = self.universesize;
+        #     # if(universecount==1):
+        #     #     unichns = chns;
+        #     # elif(i==universecount-1):
+        #     #     unichns = self.eff_univ_channel_stop;
+        #     # if(i==0 and break_across_first):
+        #     #     unichns = self.universesize - chstart+1;
+        #     # elif(i==universecount-1 and universecount==2 and break_across_first):                
+        #     #     unichns = self.eff_univ_channel_stop-lastunichns;
+            
+        #     if(not break_across_first):
+        #         # 1 universe
+        #         if(universecount == 1):
+        #             unichns = chns;
+        #         # last universe
+        #         elif(i==universecount-1):
+        #             unichns = self.eff_univ_channel_stop;
+        #     else:
+        #         if(i==0):
+        #             unichns = self.universesize - chstart+1;
+        #         # elif(i==universecount-1 and universecount==2):                
+        #         #     unichns = self.eff_univ_channel_stop-lastunichns;
+        #         elif(i==universecount-1):
+        #             unichns = remaining_channels;
+            
+        #     u = Universe(
+        #         self.eff_univ_start + i,
+        #         channelcount = unichns,
+        #         channelstart = chstart,
+        #         universesize = self.universesize,
+        #         );
+        #     self.universes.append( u );
+            
+        #     # what is this universe's absolute range?
+        #     unistart = lastch;
+        #     unistop = lastch+unichns-1;
+        #     rng = range(unistart,unistop,1);
+        #     print('\t',rng);
+        #     self.universe_ranges.append(rng);
+            
+        #     lastch = unistop+1;
+        #     #lastunichns = unichns;
+        #     remaining_channels -= unichns;
+        #     print('remaining',remaining_channels)
         
         #print('{:d} rgb pixels'.format(self.pixelcount));
         print('{:d} rgb pixels'.format(int(chns/3)));
@@ -321,6 +367,8 @@ class LightStepper():
     
     # _step_current_universe_index = -1;
     _step_current_pixel_index = 0;
+    _last_step_u = 0;
+    _last_step_idx = 0;
     
     def __init__(self, models : list, unicasthost="espixelstick02.lan"):
         self._models = models;
@@ -351,7 +399,7 @@ class LightStepper():
     
     def _px_to_mapped_model(self,index):
         for cnt,rng in enumerate(self._model_pixel_ranges):
-            #print(cnt,rng);
+            print(cnt,rng);
             if(index in rng):
                 #print('pixel {:d} belongs to universe index {:}'.format(index,cnt));
             #    return cnt;
@@ -514,7 +562,7 @@ class LightStepper():
     
     def next_step(self):
         newidx = self._step_current_pixel_index+1;
-        if(newidx<self.pixelcount):
+        if(newidx<=self.pixelcount):
             # increment pixel and return info
             self._step_current_pixel_index = newidx;
             print('Now set to pixel {:d}'.format(self._step_current_pixel_index))
@@ -552,12 +600,12 @@ class LightStepper():
     #     # else:
     #     #     return False;
     
-    # def get_step(self):
-    #     uidx = self._step_current_universe_index;
-    #     u = self._universes[uidx];
-    #     setidx = self._step_current_pixel_index;
-    #     #self.set_one(u,setidx,onval);
-    #     return u.universe,setidx+u.skippixels;
+    def get_step(self):
+        #print(self._step_current_pixel_index)
+        m,px,r = self._px_to_mapped_model(self._step_current_pixel_index);
+        px+=1;
+        
+        return (m,px,r)
     
     def step_on(self,onval = [150,150,150]):
         # uidx = self._step_current_universe_index;
@@ -565,7 +613,8 @@ class LightStepper():
         # setidx = self._step_current_pixel_index;
         # self.set_one(u,setidx,onval);
         # return u.universe,setidx+u.skippixels;
-        m,px,r = self.set_one(self._step_current_pixel_index+1, onval);
+        m,px,r = self.set_one(self._step_current_pixel_index, onval);
+        px+=1
         print(r);
         return r[0].universe,px;
         

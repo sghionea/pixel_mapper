@@ -42,14 +42,23 @@ datadir = workdir+"ipc3/"
 # #lights = light_control.Lights(ulist,pixelcount=100);
 # lights = light_control.Lights(ulist,pixelcount=300);
 
-allmodels = xlightscontrollerconnections.load_all_model_info('Controller_Connections.csv')
-ulist = [
-    xlightscontrollerconnections.convert_to_modeluniverse(allmodels,'Bush R1'),
-];
-#m = xlightscontrollerconnections.convert_to_modeluniverse(allmodels,'Bush R1');
-lights = light_control.LightStepper(ulist,
-                                    unicasthost="espixelstick02.lan"
-                                    );
+# NO UNDERSCORES
+if False:
+    allmodels = xlightscontrollerconnections.load_all_model_info('Controller_Connections.csv')
+    ulist = [
+        xlightscontrollerconnections.convert_to_modeluniverse(allmodels,'Bush R1'),
+    ];
+    lights = light_control.LightStepper(ulist,
+                                        unicasthost="fpp.lan"
+                                        );
+else:
+    # GARAGE TEST
+    ulist = [
+        light_control.ModelUniverses('garage-old-strand',universe=10000,    channelstart=303,           channelcount=100*3),
+    ];
+    lights = light_control.LightStepper(ulist,
+                                        unicasthost="espixelstick02.lan"
+                                        );
 
 lights.start(fps=40);
 #onval = [20,20,20];
@@ -57,9 +66,9 @@ lights.start(fps=40);
 #onvalall = [50,50,50];
 #onvalall = [100,0,0];
 
-onvalall = [100,0,0];
+onvalall = [100,100,100];
 #onval = [255,0,0];
-onval = [100,0,0]; # garage light on, outaside dusk
+onval = [100,100,100]; # garage light on, outaside dusk
 #onval = [255,0,0]; # outside 1548 45 minutes before sunset
 
 #onval = [150,150,150];
@@ -218,18 +227,18 @@ cv2.imshow("Camera1",imageAll)
 cv2.resizeWindow("Camera1", 800, 600);
 cv2.waitKey(500);
 
+lights.next_step_reset();
 while lights.next_step():    # select/pick next pixel (true while valid, false while not)
     #retval = lights.next_step();    # select/pick next pixel
     
     # check if we already have point
-    unum,index = lights.get_step();
-    if( (load_dat is not None) and (load_dat.query('uni == @unum and index == @index').shape[0] == 1)):
-        print('Skipping because data was already collected')
-        continue;
+    m,index,r = lights.get_step();
+    # if( (load_dat is not None) and (load_dat.query('uni == @unum and index == @index').shape[0] == 1)):
+    #     print('Skipping because data was already collected')
+    #     continue;
     
     if(True):
         image_off = getImageOff();
-        cv2.imwrite(workdir+'/cap_U{:d}_{:03d}_imgoff.png'.format(unum,index),image_off);
         cv2.imshow("Camera1",image_off)
         #cv2.resizeWindow("Camera1", 800, 600);
         cv2.waitKey(500)
@@ -239,9 +248,18 @@ while lights.next_step():    # select/pick next pixel (true while valid, false w
         # image = vsource.currentFrame
         # print("image")
         image,unum,index = getImageOn();
-        cv2.imwrite(workdir+'/cap_U{:d}_{:03d}_imgon.png'.format(unum,index),image);
         cv2.imshow("Camera1",image);
         cv2.waitKey(500);
+        
+        unum = r[0].universe;
+        modelname = m.name;
+        
+        cv2.imwrite(workdir+'/cap{:s}_U{:d}_{:03d}_imgoff.png'.format(modelname,unum,index),image_off);
+        cv2.imwrite(workdir+'/cap{:s}_U{:d}_{:03d}_imgon.png'.format(modelname,unum,index),image);        
+    
+    if(False):
+        unum,index = lights.step_on(onval);
+        time.sleep(2);
             
 
 
@@ -281,6 +299,7 @@ while lights.next_step():    # select/pick next pixel (true while valid, false w
 
 #%% cleanup / quit    
 #cap.release();
+lights.all_off();
 lights.stop();
 vsource.release();
 cv2.destroyWindow("Pixel Mapping")
@@ -288,15 +307,3 @@ cv2.destroyWindow("Pixel Mapping")
 #%% load image
 if __name__ == '__main__':
     sys.exit(0);
-
-#%% load image
-frame = cv2.imread(workdir + "aruco_img.png")
-gray = cv2.cvtColor(frame.copy(), cv2.COLOR_BGR2GRAY)
-corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(gray, aruco_dict, parameters = arucoParams)
-print('Finding poses for markers',ids.flatten().tolist());
-rvecs, tvecs, _objpts = aruco.estimatePoseSingleMarkers(corners, size_of_marker , camera_matrix, dist_coeffs);
-
-# select the marker we want
-idx = np.where(ids==markerid_to_search)[0][0]
-rvec = rvecs[idx];
-tvec = tvecs[idx];
