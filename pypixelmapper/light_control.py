@@ -273,7 +273,7 @@ class ModelUniverses():
         #ustart = self.universe_ranges[uidx].start;
         ustart = u.channelstart;
         #universe_size_offset = self.universe_ranges[uidx].start;
-        universe_size_offset = uidx*self.universesize
+        universe_size_offset = (u.universe-self.startuniverse)*self.universesize
         # if(uidx==0):
         #     start_absolute_channel_for_univ = ustart+(this_channel_start-self.channelstart)
         # else:
@@ -283,7 +283,7 @@ class ModelUniverses():
         # else:
         #     start_absolute_channel_for_univ = (uidx*self.universesize+1)-self.universe_ranges[uidx].start
         #start_absolute_channel_for_univ = ustart+(this_channel_start-self.channelstart)
-        start_absolute_channel_for_univ = this_channel_start-universe_size_offset
+        start_absolute_channel_for_univ = this_channel_start-universe_size_offset-1
         print('Asked for px {:d}/{:d} (chnabs={:d},uidx={:d},u={:d},chnuni={:d})'.format(
             index,
             self.pixelcount,
