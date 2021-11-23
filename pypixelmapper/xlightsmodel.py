@@ -7,9 +7,9 @@ Created on Sun Oct 31 07:42:29 2021
 
 import numpy as np
 
-xLights_output_scale_factor = 3.0  #scaling factor to reduce the size of the xLights output file to a reasonable size
+xLights_output_scale_factor = 10.0  #scaling factor to reduce the size of the xLights output file to a reasonable size
 
-def outputXlightsModelFile(out , pixellist = None, outfilename = 'testmodel.xmodel'):
+def outputXlightsModelFile(out , pixellist = None, modelname = 'testmodel'):
     #Create output file in xlights format
     #xlights format:
     #commas separate columns (width) (X), semicolons separate rows (height) (Y), "|" separate depth (Z)
@@ -61,7 +61,7 @@ def outputXlightsModelFile(out , pixellist = None, outfilename = 'testmodel.xmod
     			outstring = outstring + ";"
     	if i != len(xlout)-1:
     		outstring = outstring + "|"
-    outxml = '<?xml version="1.0" encoding="UTF-8"?><custommodel name="Test" parm1="' + str(xmax-xmin) + '" parm2="' + str(zmax-zmin) + '" Depth="' + str(ymax-ymin) + '" StringType="RGB Nodes" Transparency="0" PixelSize="2" ModelBrightness="" Antialias="1" StrandNames="" NodeNames="" CustomModel="' + outstring + '" SourceVersion="2020.37"  ></custommodel>'
-    f = open(outfilename,'w')
+    outxml = '<?xml version="1.0" encoding="UTF-8"?><custommodel name="{:s}" parm1="'.format(modelname) + str(xmax-xmin) + '" parm2="' + str(zmax-zmin) + '" Depth="' + str(ymax-ymin) + '" StringType="RGB Nodes" Transparency="0" PixelSize="2" ModelBrightness="" Antialias="1" StrandNames="" NodeNames="" CustomModel="' + outstring + '" SourceVersion="2020.37"  ></custommodel>'
+    f = open(modelname+'.xmodel','w')
     f.write(outxml)
     f.close()

@@ -18,7 +18,8 @@ import yaml
 import pypixelmapper.camera_calibration as camera_calibration
 import pypixelmapper.arucomarkers as arucomarkers
 from pypixelmapper.paths import workdir
-datadir = workdir+"ipc3/"
+#datadir = workdir+"ipc3/"
+datadir = workdir+"c920c1f0/"
 #%% 
 # https://mecaruco2.readthedocs.io/en/latest/notebooks_rst/Aruco/sandbox/ludovic/aruco_calibration_rotation.html
 

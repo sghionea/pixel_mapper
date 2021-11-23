@@ -28,21 +28,55 @@ if False:
     sys.exit(0);    
 
 
-camera_resolution = [2048,1536]   #resolution (in pixels) of the camera [Horizontal, Vertical]
-#camera_resolution = [1920,1080]   #resolution (in pixels) of the camera [Horizontal, Vertical]
+#camera_resolution = [2048,1536]   #resolution (in pixels) of the camera [Horizontal, Vertical]
+camera_resolution = [1920,1080]   #resolution (in pixels) of the camera [Horizontal, Vertical]
 #camera_resolution = [640,480]   #resolution (in pixels) of the camera [Horizontal, Vertical]
 #cap = cv2.VideoCapture('rtsp://username:password@cam.ip.add.ress:88/videoMain')  #Foscam X1 format address - others will be different
 
 if False:
-    cap = cv2.VideoCapture(0)  #Foscam X1 format address - others will be different
+    print('Opening video')
+    cap = cv2.VideoCapture(1)  #Foscam X1 format address - others will be different
+    print('Opened video')
     def make_1080p():
         cap.set(3, camera_resolution[0])
         cap.set(4, camera_resolution[1])
     make_1080p();
+    
+if True:    
+    vc = cv2.VideoCapture(1, cv2.CAP_DSHOW);
+    
+    # frame size
+    vc.set(cv2.CAP_PROP_FRAME_WIDTH, camera_resolution[0]);
+    vc.set(cv2.CAP_PROP_FRAME_HEIGHT, camera_resolution[1]);
+    
+    # # optional fps
+    # if(c.fps is not None):
+    #     vc.set(cv2.CAP_PROP_FPS, c.fps);
+        
+    # # optional zoom
+    # if(c.zoom is not None):
+    #     # works well for the LOGITECH C810 cameras
+    #     vc.set(cv2.CAP_PROP_ZOOM,c.zoom);
+    
+    # optional focus
+    #if(c.focus is not None):
+    # works well for the LOGITECH C810 cameras
+    vc.set(cv2.CAP_PROP_AUTOFOCUS,0);
+    #vc.set(cv2.CAP_PROP_FOCUS,10);
+    vc.set(cv2.CAP_PROP_FOCUS,0); # far field
+    # else:
+    #     vc.set(cv2.CAP_PROP_AUTOFOCUS,1);
+        
+    # optional directshow propwindow
+    #if(c.propwindow):
+        #vc.set(cv2.CAP_PROP_SETTINGS,0); #popup window
+    vc.set(cv2.CAP_PROP_SETTINGS,0); #popup window
+    
+    cap = vc;
 
 #rtsp://192.168.1.204:554/onvif1
 
-if True:
+if False:
     #cap = cv2.VideoCapture('rtsp://192.168.1.204:554/onvif1')
     cap = cv2.VideoCapture('rtsp://admin:123456@192.168.1.104:554/cam/realmonitor?channel=1&subtype=0')
 

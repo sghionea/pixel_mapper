@@ -237,9 +237,9 @@ class ModelUniverses():
     
     def _chnabs_to_universe(self,absolute_channel):
         for cnt,rng in enumerate(self.universe_ranges):
-            #print(cnt,rng);
-            if(absolute_channel in rng):
-                #print('pixel {:d} belongs to universe index {:}'.format(index,cnt));
+            print(cnt,rng);
+            if(absolute_channel in rng or absolute_channel == rng.stop):
+                print('pixel {:d} belongs to universe index {:}'.format(absolute_channel,cnt));
                 return cnt;
             
         return False;
@@ -274,6 +274,7 @@ class ModelUniverses():
         ustart = u.channelstart;
         #universe_size_offset = self.universe_ranges[uidx].start;
         universe_size_offset = (u.universe-self.startuniverse)*self.universesize
+        print('Universe size offset',universe_size_offset);
         # if(uidx==0):
         #     start_absolute_channel_for_univ = ustart+(this_channel_start-self.channelstart)
         # else:
@@ -435,7 +436,7 @@ class LightStepper():
         
         # assign to sender
         for uval, vals in u_dict.items():
-            print('Set {:d} to'.format(uval),vals);
+            #print('Set {:d} to'.format(uval),vals);
             self._sender[uval].dmx_data = vals;
             
 
@@ -512,7 +513,7 @@ class LightStepper():
         
         # assign to sender
         for uval, vals in finald.items():
-            print('Set {:d} to'.format(uval),vals);
+            #print('Set {:d} to'.format(uval),vals);
             self._sender[uval].dmx_data = vals;
         
         return finald;

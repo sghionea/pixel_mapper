@@ -9,10 +9,16 @@ import pypixelmapper.camera_calibration as camera_calibration
 from pypixelmapper.camera_source import startCapture
 import pypixelmapper.arucomarkers as arucomarkers
 from pypixelmapper.paths import workdir
-datadir = workdir+"ipc3/"
+#datadir = workdir+"ipc3/"
+datadir = workdir+"c920c1f0/"
 
 #%% Aruco setup
 arucoParams = arucomarkers.getArucoDetector();
+arucoParams.cornerRefinementMethod = aruco.CORNER_REFINE_SUBPIX;
+arucoParams.adaptiveThreshConstant = 15; # default is 7.0
+arucoParams.cornerRefinementWinSize = 3; # default is 5
+arucoParams.detectInvertedMarker = True;
+#arucoParams.adaptiveThreshConstant = ; # default is 7.0
 aruco_dict, size_of_marker = arucomarkers.getArucoInfo();
 
 
@@ -75,6 +81,10 @@ pause = False;
 while True:
     #ret, frame = cap.read();
     frame = vsource.currentFrame;
+    if(frame is None):
+        print('Frame reqturned empty, continue')
+        continue;
+    #print(frame.shape);
     #print('Read frame ({:d})'.format(ret))
 
     if not pause:
@@ -102,7 +112,7 @@ while True:
     # decimator+=1
         #frame_remapped = cv2.remap(frame, map1, map2, cv2.INTER_LINEAR, cv2.BORDER_CONSTANT)    # for fisheye remapping
         #frame_remapped_gray = cv2.cvtColor(frame_remapped, cv2.COLOR_BGR2GRAY)
-        frame_remapped = frame;
+        frame_remapped = frame.copy();
         frame_remapped_gray = cv2.cvtColor(frame_remapped, cv2.COLOR_BGR2GRAY)
 
         corners, ids, rejectedImgPoints = aruco.detectMarkers(frame_remapped_gray, aruco_dict, parameters=arucoParams)  # First, detect markers
@@ -138,11 +148,13 @@ while True:
             #     frame_captured += 1;
             
             
-            
+            #myframe = frame_remapped.copy();
             cv2.imshow("Pixel Mapping", im_with_charuco_board)
         else:
             #im_with_charuco_left = frame_remapped
             cv2.imshow("Pixel Mapping",frame);
+            #myframe = frame.copy();
+            im_with_charuco_board = frame_remapped;
         
         #ids = None;
         #cv2.imshow("charucoboard", im_with_charuco_board)
@@ -162,7 +174,7 @@ while True:
         if(not pause):
             print('UNPAUSED, save and pause');
             # take snapshots and record pose informations, and pause update
-            cv2.imwrite(workdir + "aruco_img.png", frame);
+            cv2.imwrite(workdir + "aruco_img.png", frame_remapped);
             cv2.imwrite(workdir + "aruco_img_wireframe.png", im_with_charuco_board);
             im_with_charuco_board = cv2.putText(im_with_charuco_board, 
                                                 text = 'Captured, and now paused',
@@ -174,6 +186,7 @@ while True:
                                                 lineType = cv2.LINE_AA
                                                 );
             cv2.imshow("Pixel Mapping", im_with_charuco_board);
+            np.savez(workdir+"aruco_detections.npz",corners=corners,ids=ids,rejectedImgPoints=rejectedImgPoints)
             pause = True;
         else:
             pause = False;
