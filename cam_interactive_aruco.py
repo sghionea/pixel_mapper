@@ -9,8 +9,8 @@ import pypixelmapper.camera_calibration as camera_calibration
 from pypixelmapper.camera_source import startCapture
 import pypixelmapper.arucomarkers as arucomarkers
 from pypixelmapper.paths import workdir
-#datadir = workdir+"ipc3/"
-datadir = workdir+"c920c1f0/"
+datadir = workdir+"ipc3/"
+#datadir = workdir+"c920c1f0/"
 
 #%% Aruco setup
 arucoParams = arucomarkers.getArucoDetector();

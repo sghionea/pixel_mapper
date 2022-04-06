@@ -17,29 +17,29 @@ def read_xl_controller_connections(fname = 'C:\Simon\Personal\dmxpixels\pixel_ma
       controller_str = '';
       pixel_ports = [];
       for row in reader:
-        #print(row)
+        print(row)
         
         # out of controller
         if(controller_str == ''):
             if(len(row)>0):
-                #print('Starting controller');
+                print('Starting controller');
                 controller_str = row;
         
         # in controller
         if(not controller_str == ''):
             if(len(row)==0):
-                #print('done with controller');
+                print('done with controller');
                 controller_strings.append((controller_str,pixel_ports));
                 controller_str = '';
                 pixel_ports = [];
                 # done with controller
-                break; # stop after firsts
+                #break; # stop after firsts
             elif(row[0]=="Output"):
                 # this is a header
-                #print('header row')
+                print('header row')
                 pass;
             elif(row[0].find('Pixel Port')>=0):
-                #print('pixel port');
+                print('pixel port');
                 pixel_ports.append(row);
         
         #print('')
@@ -58,7 +58,7 @@ def separate_info_to_dict(l):
     return d;
 
 def parse_pixel_port_strings(info):
-    pp = info[0][1];
+    pp = info[2][1];
     allmodels = {};
     for row in pp:
         strs_port_info = [];
@@ -70,7 +70,7 @@ def parse_pixel_port_strings(info):
             # pixel port in use
             #break;
             strs_port_info = re.findall(r'\((.*?)\)',row[0]);
-            port = int(re.findall(r'Port ([0-9]?)\(',row[0])[0]);
+            port = int(re.findall(r'Port ([0-9]*)\(',row[0])[0]);
             port_info = separate_info_to_dict(strs_port_info)
             
             print('-'*25);
@@ -109,9 +109,11 @@ def convert_to_modeluniverse(allmodels,modelname='Bush R1'):
     return m;
 
 #%% test code
+
 if __name__ == "__main__":
     allmodels = load_all_model_info()
-    m = convert_to_modeluniverse(allmodels,'Bush R1');
+    #m = convert_to_modeluniverse(allmodels,'Bush R1');
+    m = convert_to_modeluniverse(allmodels,'bigbushsouth');
     
     # print('');
     # print('ALL MODELS:');

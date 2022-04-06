@@ -25,7 +25,10 @@ from pypixelmapper.paths import workdir
 
 #%%
 cam = 'ipc3';
-model = 'bushL1c';
+#model = 'bushL1c';
+#model = 'bigbush-east';
+#model = 'Bush R1,Bush R2'
+model = 'bigbushnorth'
 
 # cam = 'c920c1f0';
 # model = 'bigbush-south,bigbush-top'
@@ -189,6 +192,28 @@ else:
 
 #%% Parse filenames for info
 bases = [os.path.basename(p) for p in images_on];
+
+# do we need to rename files?
+# (accidentally usedu nderscores in model name)
+if( not bases[0].split('_')[1].startswith('U') ):
+    print('We must rename files');
+    folder = os.path.split(images_on[0])[0];
+    if True:
+        for fname in images_off+images_on:
+            fname = os.path.basename(fname);
+            split = fname.split('_');
+            dname = split[0]+'-'+split[1]+'_'+'_'.join(split[2:]);
+            print('Rename',fname,'to',dname)
+            
+            os.rename(folder+'/'+fname,folder+'/'+dname);
+# for fname in images_on:
+#     fname = os.path.basename(fname);
+#     split = fname.split('_');
+#     split2 = fname.split('-');
+#     dname = split2[0]+'-'+split2[1]+'_'+split2[2];
+#     print('Rename',fname,'to',dname)
+#     os.rename(folder+'/'+fname,folder+'/'+dname);
+#%%
 #pixelinfo = [tuple(s.split('_')[0:3]) for s in bases]
 info_model = [s.split('_')[0] for s in bases]
 info_uni = [int(s.split('_')[1].replace('U','')) for s in bases]
@@ -202,8 +227,8 @@ info_index = [int(s.split('_')[2]) for s in bases]
 # #lights.all_on([255,255,255]);  #turn all pixels on
 # time.sleep(1)
 print('Reading {:s} for polygon drawing'.format(file_img_all));
-frame = cv2.imread(file_img_all)
-polyd = PolygonDrawer("Polygon1",frame)
+frame_img_all = cv2.imread(file_img_all)
+polyd = PolygonDrawer("Polygon1",frame_img_all.copy())
 fname_poly = mycapdir+'/polygon.npy';
 if( os.path.exists(fname_poly) ):
     polyd.polygon = np.load(fname_poly);
@@ -779,17 +804,27 @@ while True:
             #cnt -= 1;
             undolast = True;
             break;
+        elif(key==39):   # ' apostrophe (display the "ALL" image)
+            #cnt -= 1;
+            #undolast = True;
+            previmg = frame_img_all.copy();
+            cv2.putText(previmg, 
+                text = '--ALL IMAGE--'.format(),
+                org = (800,950),
+                fontFace = cv2.FONT_HERSHEY_DUPLEX,
+                fontScale = 2,
+                color = (0,255,0),
+                thickness = 2,
+                lineType = cv2.LINE_AA
+            );
+            image_show = cv2.imshow(windowName, previmg);
+            pass;
         elif(key==44): # "<" symbol
             prevcnt -= 1;
             if(prevcnt!=0):
                 previmg = cv2.imread(images_on[cnt+prevcnt]);
                 cv2.putText(previmg, 
-                    text = 'PREV {:d} -> U{:d},{:d},{:s}'.format(
-                        prevcnt,
-                        info_uni[cnt+prevcnt],
-                        info_index[cnt+prevcnt],
-                        info_model[cnt+prevcnt],
-                        ),
+                    text = '--ALL IMAGE--'.format(),
                     org = (800,950),
                     fontFace = cv2.FONT_HERSHEY_DUPLEX,
                     fontScale = 2,

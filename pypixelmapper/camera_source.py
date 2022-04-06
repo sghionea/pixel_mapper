@@ -16,7 +16,7 @@ def openCaptureSource():
             cap.set(4, 1080)
         make_1080p();
         
-    if True:
+    if False:
         camera_resolution = (1920,1080);
         
         vc = cv2.VideoCapture(1, cv2.CAP_DSHOW);
@@ -55,7 +55,7 @@ def openCaptureSource():
         
         cap = vc;
     
-    if False:
+    if True:
         #cap = cv2.VideoCapture('rtsp://192.168.1.204:554/onvif1');
         cap = cv2.VideoCapture('rtsp://admin:123456@1G021E7PAA00187.lan:554/cam/realmonitor?channel=1&subtype=0')
         

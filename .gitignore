@@ -133,3 +133,5 @@ packet.py
 archive/
 /workdir/ipc1/*.png
 *.png
+/workdir/captures/ipc3/elem2/02/*.npy
+*.npy

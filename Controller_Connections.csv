@@ -1,26 +1,28 @@
-FPP DDP 192.168.1.246
-Output,Model 1,Model 2,Model 3,Model 4,Model 5,
-Pixel Port 1,
-Pixel Port 2(SC:1)(UNI:#1:1)(CHANS:903)(PIX:301),Bush L2(SC:1)(UNI:#1:1)(CHANS:450)(PIX:150),Flood rock cat(SC:451)(UNI:#1:451)(CHANS:3)(PIX:1),Bush L1(SC:454)(UNI:#1:454)(CHANS:450)(PIX:150),
-Pixel Port 3,
-Pixel Port 4(SC:904)(UNI:#1:904)(CHANS:1200)(PIX:400),Big bush(SC:904)(UNI:#1:904)(CHANS:1200)(PIX:400),
-Pixel Port 5(SC:2104)(UNI:#1:2104)(CHANS:27)(PIX:9),Flood bush top cat(SC:2104)(UNI:#1:2104)(CHANS:3)(PIX:1),Flood grass cat 1(SC:2107)(UNI:#1:2107)(CHANS:3)(PIX:1),Flood grass cat 2(SC:2110)(UNI:#1:2110)(CHANS:3)(PIX:1),Flood skull(SC:2113)(UNI:#1:2113)(CHANS:3)(PIX:1),Skull Pixels(SC:2116)(UNI:#1:2116)(CHANS:15)(PIX:5),
-Pixel Port 6,
-Pixel Port 7,
-Pixel Port 8(SC:2131)(UNI:#1:2131)(CHANS:1200)(PIX:400),Bush R1(SC:2131)(UNI:#1:2131)(CHANS:600)(PIX:200),Bush R2(SC:2731)(UNI:#1:2731)(CHANS:600)(PIX:200),
-
-
-
-
-ESPixelStick02 DDP 192.168.1.100
-Output,Model 1,Model 2,
-Pixel Port 1(SC:3331)(UNI:#1:1)(CHANS:303)(PIX:101),GarageFlood(SC:3331)(UNI:#1:1)(CHANS:3)(PIX:1),GarageSingle Line(SC:3334)(UNI:#1:4)(CHANS:300)(PIX:100),
-
-
-
-
-ESPixelStick01 DDP 192.168.1.191
+espixelstick02 DDP 192.168.1.100
 Output,
+
+
+
+
+INACTIVE ESPixelStick01 DDP 192.168.1.191
+Output,
+
+
+
+
+FPP DDP 192.168.1.243
+Output,Model 1,Model 2,Model 3,Model 4,Model 5,Model 6,Model 7,Model 8,Model 9,
+Pixel Port 1,
+Pixel Port 2(SC:3)(UNI:#2:1)(CHANS:900)(PIX:300),Bush L1c(SC:3)(UNI:#2:1)(CHANS:450)(PIX:150),Bush L2l(SC:453)(UNI:#2:451)(CHANS:450)(PIX:150),
+Pixel Port 3,
+Pixel Port 4,
+Pixel Port 5(SC:903)(UNI:#2:901)(CHANS:1188)(PIX:396),GarageGutterWindows(SC:903)(UNI:#2:901)(CHANS:240)(PIX:80),GarageGutterDoors(SC:1143)(UNI:#2:1141)(CHANS:288)(PIX:96),GarageDownspoutL(SC:1431)(UNI:#2:1429)(CHANS:84)(PIX:28),GarageDoorOutlines(SC:1515)(UNI:#2:1513)(CHANS:450)(PIX:150),GarageDownspoutRBot(SC:1965)(UNI:#2:1963)(CHANS:30)(PIX:10),GarageDownspoutRTop(SC:1995)(UNI:#2:1993)(CHANS:96)(PIX:32),
+Pixel Port 6,
+Pixel Port 7(SC:2091)(UNI:#2:2089)(CHANS:150)(PIX:50),officebrickwall(SC:2091)(UNI:#2:2089)(CHANS:150)(PIX:50),
+Pixel Port 8(SC:2241)(UNI:#2:2239)(CHANS:1482)(PIX:494),Bush R1(SC:2241)(UNI:#2:2239)(CHANS:600)(PIX:200),Bush R2(SC:2841)(UNI:#2:2839)(CHANS:600)(PIX:200),entryoutline(SC:3441)(UNI:#2:3439)(CHANS:282)(PIX:94),
+Pixel Port 9(SC:3723)(UNI:#2:3721)(CHANS:333)(PIX:111),Flood santa(SC:3723)(UNI:#2:3721)(CHANS:3)(PIX:1),Flood reindeer grp A R(SC:3726)(UNI:#2:3724)(CHANS:3)(PIX:1),Flood reindeer grp B(SC:3729)(UNI:#2:3727)(CHANS:3)(PIX:1),Flood reindeer grp C(SC:3732)(UNI:#2:3730)(CHANS:3)(PIX:1),Flood reindeer grp D L(SC:3735)(UNI:#2:3733)(CHANS:3)(PIX:1),Flood reindeer cat(SC:3738)(UNI:#2:3736)(CHANS:3)(PIX:1),Rudolph cat necklace(SC:3741)(UNI:#2:3739)(CHANS:15)(PIX:5),Sled team line start(SC:3756)(UNI:#2:3754)(CHANS:18)(PIX:6),Sled team speed line(SC:3774)(UNI:#2:3772)(CHANS:282)(PIX:94),
+Pixel Port 10(SC:4056)(UNI:#2:4054)(CHANS:2400)(PIX:800),bigbusheast(SC:4056)(UNI:#2:4054)(CHANS:210)(PIX:70),bigbushnorth(SC:4266)(UNI:#2:4264)(CHANS:1218)(PIX:406),bigbushwest(SC:5484)(UNI:#2:5482)(CHANS:147)(PIX:49),bigbushsouth(SC:5631)(UNI:#2:5629)(CHANS:825)(PIX:275),
+Pixel Port 11(SC:6456)(UNI:#2:6454)(CHANS:1200)(PIX:400),bigbushtop(SC:6456)(UNI:#2:6454)(CHANS:1200)(PIX:400),
 
 
 

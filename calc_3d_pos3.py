@@ -28,12 +28,22 @@ import re
 from pypixelmapper.paths import workdir
 
 #%% defs
-camname = 'ipc3';
-#model = 'bushL2l'
-model = 'bushL1c'
+# camname = 'ipc3';
+# #model = 'bushL2l'
+# model = 'bushL1c'
+
+#dothis = ('ipc3','bushL1c');
+#dothis = ('ipc3','bushL2l');
+#dothis = ('ipc3','Bush R1,Bush R2');
+#dothis = ('ipc3','bigbush-east');
+dothis = ('ipc3','bigbushnorth');
 
 # camname = 'c920c1f0';
 # model = 'bigbush-south,bigbush-top'
+#dothis = ('c920c1f0','bigbush-south,bigbush-top');
+
+
+camname,model = dothis;
 
 datadir = workdir+camname+"/"
 #camname = datadir.split('/')[2];
@@ -142,8 +152,12 @@ class CaptureSet:
         # aruco info
         aruco_dict,size_of_marker = arucomarkers.getArucoInfo();
         arucoParams = arucomarkers.getArucoDetector();
+        # arucoParams.cornerRefinementMethod = aruco.CORNER_REFINE_SUBPIX;
+        # arucoParams.adaptiveThreshConstant = 5; # default is 7.0
         arucoParams.cornerRefinementMethod = aruco.CORNER_REFINE_SUBPIX;
-        arucoParams.adaptiveThreshConstant = 5; # default is 7.0
+        arucoParams.adaptiveThreshConstant = 15; # default is 7.0
+        arucoParams.cornerRefinementWinSize = 3; # default is 5
+        arucoParams.detectInvertedMarker = True;
         
         # TRY
         def drawDetected(frame,corners,ids):
@@ -171,6 +185,7 @@ class CaptureSet:
         fdetect = (Path(self.capdir)/'aruco_detections.npz');
         # vet it
         if(fdetect.exists()):
+            print('Load Aruco data directly from saved file')
             # found predetected info
             arucofile = np.load(fdetect,allow_pickle=True);
             
@@ -179,34 +194,48 @@ class CaptureSet:
                 corners = arucofile['corners'];
                 ids = arucofile['ids'];
                 rejectedImgPoints = arucofile['rejectedImgPoints'];
+                print('Loaded markers',ids);
             arucofile.close();  
             
+        criteria = "(ids is None)";
+        #criteria = "(ids is None) or (37 not in ids)";
         if(not have_aruco_reference ):
             frame_tries = [
                 self.images['aruco'],
                 self.images['all'],
                 ]
             for num,frame in enumerate(frame_tries):
-                print('Trying',num,end='')
+                print('Trying main frame',num,end='')
+                if frame is None:
+                    continue;
                 corners,ids,rejectedImgPoints,gray,frame2,newcameramtx = doDetect(frame);
-                if(ids is not None):
-                    print('good');
+                if(not eval(criteria)):
+                    print(' was good');
+                    print(ids);
                     break;
                 else:
-                    print('fail');
-            # if(ids is None):
-            #     for num,fname in enumerate(self.imgson+self.imgsoff):
-            #         print('Trying',num)
-            #         corners,ids,rejectedImgPoints,gray,frame2,newcameramtx = doDetect(frame);
-            #         frame = cv2.imread(str(fname));
-            #         if(ids is not None):
-            #             print('good');
-            #             #cv2.imshow("aruco cap frame {:d}".format(num),frame2);
-            #             ofn = 'aruco_find'+'_'.join(fname.name.split('_')[1:]);
-            #             cv2.imwrite(str(fname.parent / ofn),frame2);
-            #             #break;
-            #         else:
-            #             print('fail');
+                    #print('fail');
+                    pass;
+            #if(ids is None):
+
+            if(eval(criteria)):
+                for num,fname in enumerate(self.imgson.tolist()+self.imgsoff.tolist()):
+                    print('Consider',num)
+                    frame = cv2.imread(str(fname));
+                    corners,ids,rejectedImgPoints,gray,frame2,newcameramtx = doDetect(frame);
+                    if(not eval(criteria)):
+                        print('Trying',num,fname.name,end='')
+                        print(' was good');
+                            #cv2.imshow("aruco cap frame {:d}".format(num),frame2);
+                        ofn = 'aruco_find'+'_'.join(fname.name.split('_')[1:]);
+                        cv2.imwrite(str(fname.parent / ofn),frame2);
+                        ofn = 'aruco_find'+'_'.join(fname.name.split('_')[1:])+'_REF';
+                        cv2.imwrite(str(fname.parent / ofn),frame);
+                        #break;
+                    else:
+                        #print('fail');
+                        pass;
+                raise RuntimeError('generated files');
 
         
         print('Finding poses for markers',ids.flatten().tolist());
@@ -324,8 +353,8 @@ class CaptureSet:
         self.euler_angles_degrees = euler_angles_degrees;
         
     def fileList(self):
-        imgson = np.array([Path(self.capdir + "/" + f) for f in os.listdir(self.capdir) if f.endswith("imgon.png") ]);
-        imgsoff= np.array([Path(self.capdir + "/" + f) for f in os.listdir(self.capdir) if f.endswith("imgoff.png") ]);
+        imgson = np.array([Path(self.capdir + "/" + f) for f in os.listdir(self.capdir) if f.endswith("imgon.png") and not f.startswith("aruco") ]);
+        imgsoff= np.array([Path(self.capdir + "/" + f) for f in os.listdir(self.capdir) if f.endswith("imgoff.png") and not f.startswith("aruco")]);
         # if(len(images)>0):
         #     file_img_all = images[0];
         # else:
@@ -333,11 +362,16 @@ class CaptureSet:
         
         universes = [(x.name.split('_')[1].replace('U','')) for x in imgson];
         index = [(x.name.split('_')[2]) for x in imgson];
+        elems = [x.name.split('_')[0][3:] for x in imgson if x.name.find('aruco')];
+        plist = [(int(x),int(y)) for x,y in zip(universes,index)];
+        
         
         self.imgson = imgson;
         self.imgsoff = imgsoff;
         self.unis = universes;
         self.index = index;
+        self.elems = elems;
+        self.plist = plist;
         
     def projectLine(self,universe,index):
         """
@@ -480,7 +514,12 @@ def relativePosition(rvec1, tvec1, rvec2, tvec2):
 for ds in modenotfoundin:
     # find
     #otherids = np.hstack([x.ids.T[0] for x in datasets if x != ds]);
-    other_ds_with_our_ids = [x for x in datasets if ds.ids in x.ids and x != ds]
+    #other_ds_with_our_ids = [x for x in datasets if ds.ids in x.ids and x != ds]
+    other_ds_with_our_ids = [
+        x for x in datasets
+        if len(set(ds.ids.flatten().tolist()).intersection(x.ids.flatten().tolist()))>0 and 
+        x != ds
+    ]
     
     # can't continue?
     if(len(other_ds_with_our_ids)==0):
@@ -490,17 +529,23 @@ for ds in modenotfoundin:
     print('Working on non-conforming cap',ds.name, 'which has', ds.ids.T[0].tolist());
     print('\talso in caps:',[x.name for x in other_ds_with_our_ids])
     otherids = np.hstack([x.ids.T[0] for x in other_ds_with_our_ids])
-    otherids = otherids[otherids != modeval]
-    otherids = otherids[otherids == ds.ids.T[0]]
+    otherids = otherids[otherids != modeval] # remove the modeval
+    # otherids = otherids[otherids == ds.ids.T[0]]
     #sotherids = set(otherids);
     #sotherids.discard(modeval);
     counts2 = np.bincount(otherids);
     mode2val = np.argmax(counts2);
     mode2valvalcnt = counts2[mode2val];
-    print('\t=> refer {:d} to entire-set mode {:d}'.format(mode2val,modeval))
+    reduce_to_caps = [
+        x for x in other_ds_with_our_ids
+        if mode2val in x.ids
+    ]
+    print('\t=> refer {:d} from {:s} to entire-set mode {:d}'.format(mode2val,
+                                str([x.name for x in reduce_to_caps]),modeval))
+    print('\t====>>>',[x.name for x in reduce_to_caps])
     print('-'*20);
 
-    for x2 in other_ds_with_our_ids:
+    for x2 in reduce_to_caps:
         print('\t\t cap {:s} compose {:d} to {:d}'.format(x2.name,mode2val,modeval))
         # select the marker we want
         idx = np.where(x2.ids==modeval)[0][0]
@@ -573,9 +618,6 @@ for ds in modenotfoundin:
         tvec21b = dtvec1 + np.matmul(dR_1.T, tvec22)
         print('\t'*3 + 'tvec21b=',tvec21b)
         
-        
-        #break;
-
 
 #%% Show poses
 nrows = int(len(datasets)/2);
@@ -702,17 +744,43 @@ p.close();
 
 #%% Main Loop - find closest points
 # assume that first capture contains entirety of universe,index list
-pixellist = datasets[0].data.index.tolist();
+#pixellist = datasets[0].data.index.tolist();
+pixellist = datasets[0].plist;
+
+# select an element
+if False:
+    df = pd.DataFrame({'plist':pixellist,'elems':datasets[0].elems})
+    elemselect = 'bigbush-top';
+    #elemselect = 'bigbush-south';
+    #r = df.query("elems == 'Bush R1'");
+    #r = df.query("elems == 'Bush R2'");
+    r = df.query("elems == @elemselect");
+    #r = df.query("elems == 'bigbush-south'");
+    pixellist = r['plist'].tolist();
+else:
+    elemselect = None;
 
 closest_point = [];
 point_spheres = [];
-for universe,index in pixellist:
-    print(universe,index);
+successful_triangulation = [];
+for cnt in range(len(pixellist)):
+    universe,index = pixellist[cnt];
+    print(cnt,universe,index);
     
     # loop through datasets and get the pixels' line projection to the work coordinate system
     lineP0 = [];
     lineP1 = [];
-    for ds in datasets:
+    #for ds in datasets:
+    #for ds in datasets[1:]:     #bigbush-top
+    for ds in [datasets[0],datasets[2]]: # bigbush-south, bigbush-top
+    #for ds in [datasets[0],datasets[2]]: # bigbush-south
+    #for ds in [datasets[0],datasets[2],datasets[4]]:
+    #for ds in datasets[0:3]: # bigbushnorth
+    #for ds in [ds for ds in datasets if ds.name in ['00','03','07']]:
+    #for ds in [ds for ds in datasets if ds.name in ['03','04','07']]:
+    #for ds in [ds for ds in datasets if ds.name in ['00','04','07']]: # bush R1
+    #for ds in [ds for ds in datasets if ds.name in ['00','04','07']]: # bush R2
+    #for ds in [ds for ds in datasets if ds.name in ['00','01','02','04','07']]: # bush R2
         P,P1 = ds.projectLine(universe, index);
         #myline = vedo.shapes.Line(p0=P,p1=[X[0],X[1],0]);
         #myline = vedo.shapes.Line(p0=P,p1=P1);
@@ -733,13 +801,141 @@ for universe,index in pixellist:
         
         closest_point.append(closest_intersection.T[0]);
         point_spheres.append(sphere_closest);
+        successful_triangulation.append(True);
     
     else:
-        print('\tNot enough captures saw this pixel');
+        print('\tNot enough captures saw this pixel.');
+        successful_triangulation.append(False);
+        closest_point.append(None);
+        point_spheres.append(None);
+        #print('\t\tUse geometric means');
+        #n = cnt-1;
+        #m = cnt+1;
+        
         #closest_point.append(np.array((0.0,0.0,0.0)))
         #closest_point.append(np.array((np.nan,np.nan,np.nan)))
     #break;
+
+#%% those without triangulations, use geometric mean of surrounding ones
+for cnt in range(len(pixellist)):
+    if(successful_triangulation[cnt]):
+        continue;
+    universe,index = pixellist[cnt];
+    print(cnt,universe,index);
+    print('\tNot enough captures saw this pixel.');
+    nd = 1;
+    n = cnt-nd;
+    while(closest_point[n] is None):
+        nd += 1;
+        n = cnt-nd;
+    mi = 1;
+    m = cnt+mi;
+    while(m<len(pixellist) and closest_point[m] is None):
+        mi += 1;
+        m = cnt+mi;
+    if(m==len(pixellist)):
+        #find last non-none entry and use that, offset by 20 in each direction
+        for cnt2,p in enumerate(closest_point[::-1]):
+            if p is not None:
+                
+                #avg = p;
+                #print('\t\tReplace index {:d}'.format(len(pixellist)-cnt2));
+                nowpoint = len(pixellist)-cnt2-2;
+                prevpoint = len(pixellist)-cnt2-3;
+                p1 = closest_point[nowpoint];
+                p2 = closest_point[prevpoint];
+                dv = p2-p1;
+                avg = p1-dv;
+                print('\t\tReplace with dv between {:d} and {:d} {:s}'.format(nowpoint,prevpoint,str(dv)));
+                
+                break;
+    else:
+        print('\t\tReplace with geometric means between {:d}({:d}) and {:d}({:d})'.format(n,nd,m,mi));
+        avg = np.mean(np.vstack([closest_point[n],closest_point[m]]),axis=0);
     
+    
+    closest_point[cnt] = avg;
+    point_spheres[cnt] = vedo.shapes.Sphere(avg,r=15,c='yellow');
+
+
+# tweaks to manually modify an outlier
+if(model=='bigbush-south,bigbush-top' and elemselect == 'bigbush-south'):
+    #bigbush-south
+    # manually modify
+    pxn = 42;
+    closest_point[pxn][1] = -500;
+    # pnt = closest_point[pxn]
+    # point_spheres[pxn] = vedo.shapes.Sphere(pnt,r=15,c='blue');
+    
+elif(model=='bigbush-south,bigbush-top' and elemselect == 'bigbush-top'):
+    #bigbush-south
+    # manually modify
+    pxn = 165;
+    closest_point[pxn][1] = 150;
+    print('Manual point tweaks for',elemselect)
+
+# make spheres
+#pts = np.vstack(closest_point);
+    
+#%% (optional) FIT TOPLANE
+if True:
+    pts = np.vstack(closest_point);
+    pts2 = vedo.pointcloud.removeOutliers(pts, 300,neighbors=5);
+    plane = vedo.fitPlane(pts2)
+    plane = plane.scale(1.2);
+    
+    pts3 = [];
+    # project onto plane
+    for p1 in pts:
+        #print(p1)
+        pA = p1+3000*plane.normal;
+        pB = p1-3000*plane.normal;
+        raytrace = plane.intersectWithLine(p0=pA,p1=pB);
+        pts3.append(raytrace[0]);
+        #raise RuntimeError();
+    
+    cones = [];
+    for ds in datasets:
+        # plot camera pose representation as a cone
+        P = ds.P;
+        euler_angles_degrees = ds.euler_angles_degrees;
+        cone = vedo.shapes.Cone(P,r=100,height=165,axis=(1,0,0));
+        cone = cone.rotateX(euler_angles_degrees[0],rad=False,locally=True);
+        cone = cone.rotateY(-euler_angles_degrees[1],rad=False,locally=True);
+        cone = cone.rotateY(euler_angles_degrees[2],rad=False,locally=True);
+        cones.append(cone);
+    
+    origin_aruco = vedo.shapes.Rectangle(p1=(0,0),p2=(165,165),c='white'); #xy plane
+    origin_aruco = origin_aruco.rotateX(0);
+    
+    title = vedo.shapes.Text2D('Element {:s}'.format(element), s=0.9, c='white');
+    p = vedo.Plotter(bg='black',axes=1);
+
+    # rotation
+    import scipy.spatial.transform
+    R = scipy.spatial.transform.Rotation.align_vectors(
+        np.array([plane.normal]), np.array([[0.0,0.0,1.0]])
+        #np.array([plane.normal]), np.array([[0.0,1.0,0.0]])
+        );
+    pts4 = np.vstack(pts3).dot(R[0].as_matrix())
+    #pt = vedo.shapes.Points(pts3,c='red');
+    pt = vedo.shapes.Points(pts4,c='red');
+    
+    actors_to_show = [title,origin_aruco]+cones+[plane,pt];
+    p.show(actors_to_show);
+    p.close();
+    
+
+    
+    # out = np.vstack(pts3);
+    # from pypixelmapper.xlightsmodel import outputXlightsModelFile
+    # outputXlightsModelFile(out,pixellist,model+'fittoplane');
+    
+    out = np.vstack(pts4);
+    from pypixelmapper.xlightsmodel import outputXlightsModelFile
+    #outputXlightsModelFile(out,pixellist,model+'fittoplanerot');
+
+
 #%% vedo show rendering of points and situation
 cones = [];
 for ds in datasets:
@@ -757,7 +953,9 @@ origin_aruco = origin_aruco.rotateX(0);
 
 title = vedo.shapes.Text2D('Element {:s}'.format(element), s=0.9, c='white');
 p = vedo.Plotter(bg='black',axes=1);
-actors_to_show = [title,origin_aruco]+cones+point_spheres;
+#actors_to_show = [title,origin_aruco]+cones+point_spheres;
+pts_vedo = vedo.shapes.Points(np.vstack(closest_point),c='red');
+actors_to_show = [title,origin_aruco]+cones+[pts_vedo];
 p.show(actors_to_show);
 p.close();
 
@@ -826,7 +1024,9 @@ p.close();
 out = np.vstack(closest_point);
 from pypixelmapper.xlightsmodel import outputXlightsModelFile
 
-outputXlightsModelFile(out,pixellist,model);
+#outputXlightsModelFile(out,pixellist,model);
+#outputXlightsModelFile(out,pixellist,model,scalefactor=5.0);
+outputXlightsModelFile(out,pixellist,model,scalefactor=10);
 #outputXlightsModelFile(out,pixellist,'test1');
 
 #%% Test Calculate Line Intersections

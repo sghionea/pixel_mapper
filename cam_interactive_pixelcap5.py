@@ -20,8 +20,8 @@ import pypixelmapper.light_control as light_control
 import pypixelmapper.xlightscontrollerconnections as xlightscontrollerconnections
 
 from pypixelmapper.paths import workdir
-#cam = 'ipc3'
-cam = 'c920c1f0'
+cam = 'ipc3'
+#cam = 'c920c1f0'
 interframe_sleep_delay = 1.5;
 #interframe_sleep_delay = 1.5;
 datadir = workdir+cam+"/"
@@ -57,8 +57,15 @@ if True:
         # 2021/11/19 night
         #light_control.ModelUniverses('bigbush_east',universe=10, channelstart=10000, channelcount=70*3), # 10000 to 10209
         #light_control.ModelUniverses('bigbush_north',universe=10, channelstart=10210, channelcount=406*3),# 10210 to 11427
-        light_control.ModelUniverses('bigbush-south',universe=10, channelstart=11575, channelcount=275*3),# 11575 to 12399
-        light_control.ModelUniverses('bigbush-top',universe=10, channelstart=14000, channelcount=400*3),# separate big top strand
+        #light_control.ModelUniverses('bigbush-south',universe=10, channelstart=11575, channelcount=275*3),# 11575 to 12399
+        #light_control.ModelUniverses('bigbush-top',universe=10, channelstart=14000, channelcount=400*3),# separate big top strand
+        
+        # 2021/11/25 day from office
+        #xlightscontrollerconnections.convert_to_modeluniverse(allmodels,'bigbushsouth'),
+
+        # 2021/11/29
+        xlightscontrollerconnections.convert_to_modeluniverse(allmodels,'bigbushnorth'),
+        
     ];
     lights = light_control.LightStepper(ulist,
                                         unicasthost="fpp.lan"
@@ -111,16 +118,16 @@ lights.start(fps=40);
 #onval = [255,0,0]; # outside 1548 45 minutes before sunset
 
 # SUNNY FULL
-onvalall = [255,255,255];
-onval = [255,255,255];
+# onvalall = [255,255,255];
+# onval = [255,255,255];
 
 # # DUSK EARLY
 # onvalall = [200,200,200];
 # onval = [200,200,200];
 
 # DUSK / DARK LATE
-# onvalall = [100,100,100];
-# onval = [100,100,100];
+onvalall = [100,100,100];
+onval = [100,100,100];
 
 # # VERY DARK
 # onvalall = [10,10,10];
